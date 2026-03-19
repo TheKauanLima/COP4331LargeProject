@@ -1,21 +1,11 @@
 import React, { useState } from 'react';
-const app_name = '64.225.28.128';
-function buildPath(route:string) : string
-{
-    if (import.meta.env.MODE != 'development')
-    {
-        return 'http://' + app_name + ':5000/' + route;
-    }
-    else
-    {
-        return 'http://localhost:5000/' + route;
-    }
-}
+import { buildPath } from './Path';
+import { retrieveToken, storeToken } from '../tokenStorage';
 
 function CardUI()
 {
-    let _ud : any = localStorage.getItem('user_data');
-    let ud = JSON.parse( _ud );
+    let _ud = localStorage.getItem('user_data');
+    let ud = JSON.parse(String(_ud));
     let userId : string = ud.id;
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
@@ -36,14 +26,12 @@ function CardUI()
     async function addCard(e:any) : Promise<void>
     {
         e.preventDefault();
-        let obj = {userId:userId,card:card};
-        let js = JSON.stringify(obj);
+        var obj = {userId:userId,card:card,jwtToken:retrieveToken()};
+        var js = JSON.stringify(obj);
         try
         {
-            const response = await
-            fetch(buildPath('api/addcard'),
-            {method:'POST',body:js,headers:{'Content-Type':
-            'application/json'}});
+            const response = await fetch(buildPath('api/addcard'),
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
             let txt = await response.text();
             let res = JSON.parse(txt);
 
@@ -54,6 +42,7 @@ function CardUI()
             else
             {
                 setMessage('Card has been added');
+                storeToken( res.jwtToken );
             }
         }
         catch(error:any)
@@ -65,7 +54,7 @@ function CardUI()
     async function searchCard(e:any) : Promise<void>
     {
         e.preventDefault();
-        let obj = {userId:userId,search:search};
+        let obj = {userId:userId,search:search,jwtToken:retrieveToken()};
         let js = JSON.stringify(obj);
         try
         {
@@ -73,11 +62,11 @@ function CardUI()
             fetch(buildPath('api/searchCards'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
+
             let txt = await response.text();
             let res = JSON.parse(txt);
             let _results = res.results;
             let resultText = '';
-
             for( let i=0; i<_results.length; i++ )
             {
                 resultText += _results[i];
@@ -87,6 +76,7 @@ function CardUI()
                 }
             }
             setResults('Card(s) have been retrieved');
+            storeToken( res.jwtToken );
             setCardList(resultText);
         }
         catch(error:any)

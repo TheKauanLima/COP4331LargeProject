@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-const app_name = '64.225.28.128';
-function buildPath(route:string) : string
-{
-    if (import.meta.env.MODE != 'development')
-    {
-        return 'http://' + app_name + ':5000/' + route;
-    }
-    else
-    {
-        return 'http://localhost:5000/' + route;
-    }
-}
+import { buildPath } from './Path';
+import { storeToken } from '../tokenStorage';
+import { jwtDecode, type JwtPayload } from 'jwt-decode';
+
+type AppTokenPayload = JwtPayload & {
+    userId?: number;
+    firstName?: string;
+    lastName?: string;
+};
 
 function Login()
 {
@@ -36,19 +33,41 @@ function Login()
         try
         {
             const response = await fetch(buildPath('api/login'),
-            {method:'POST',body:js,headers:{'Content-Type':'application/json'}});
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+
             var res = JSON.parse(await response.text());
-            if( res.id <= 0 )
+            const accessToken = res?.accessToken;
+            if (typeof accessToken !== 'string' || accessToken.length === 0)
             {
-                setMessage('User/Password combination incorrect');
+                setMessage(res?.error ?? 'Login failed. No token returned.');
+                return;
             }
-            else
+
+            storeToken( accessToken );
+            const decoded = jwtDecode<AppTokenPayload>(accessToken);
+
+            try
             {
-                var user =
-                {firstName:res.firstName,lastName:res.lastName,id:res.id}
-                localStorage.setItem('user_data', JSON.stringify(user));
-                setMessage('');
-                window.location.href = '/cards';
+                var ud = decoded;
+                var userId = ud.userId ?? 0;
+                var firstName = ud.firstName ?? '';
+                var lastName = ud.lastName ?? '';
+                if( userId <= 0 )
+                {
+                    setMessage('User/Password combination incorrect');
+                }
+                else
+                {
+                    var user = {firstName:firstName,lastName:lastName,id:userId}
+                    localStorage.setItem('user_data', JSON.stringify(user));
+                    setMessage('');
+                    window.location.href = '/cards';
+                }
+            }
+            catch(e)
+            {
+                console.log( e );
+                return;
             }
         }
         catch(error:any)
