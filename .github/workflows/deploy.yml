@@ -25,11 +25,11 @@ jobs:
 
     # Install and build frontend
     - name: Install frontend dependencies
-      working-directory: ./frontend
+      working-directory: ./cards/frontend
       run: npm ci
 
     - name: Build frontend
-      working-directory: ./frontend
+      working-directory: ./cards/frontend
       run: npm run build
 
     # Deploy frontend to server
@@ -40,7 +40,7 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
-        source: "frontend/dist/*"
+        source: "cards/frontend/dist/*"
         target: "/var/www/html"
         strip_components: 2
         rm: true
@@ -53,7 +53,7 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
-        source: "server.js,package.json,package-lock.json"
+        source: "cards/server.js,cards/package.json,cards/package-lock.json"
         target: "/var/cardsServer"
         overwrite: true
 
