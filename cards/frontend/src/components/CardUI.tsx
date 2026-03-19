@@ -1,4 +1,16 @@
 import React, { useState } from 'react';
+const app_name = '64.225.28.128';
+function buildPath(route:string) : string
+{
+    if (import.meta.env.MODE != 'development')
+    {
+        return 'http://' + app_name + ':5000/' + route;
+    }
+    else
+    {
+        return 'http://localhost:5000/' + route;
+    }
+}
 
 function CardUI()
 {
@@ -29,12 +41,12 @@ function CardUI()
         try
         {
             const response = await
-            fetch('http://localhost:5000/api/addcard',
+            fetch(buildPath('api/addcard'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             let txt = await response.text();
             let res = JSON.parse(txt);
-            
+
             if( res.error.length > 0 )
             {
                 setMessage( "API Error:" + res.error );
@@ -58,7 +70,7 @@ function CardUI()
         try
         {
             const response = await
-            fetch('http://localhost:5000/api/searchcards',
+            fetch(buildPath('api/searchCards'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             let txt = await response.text();
