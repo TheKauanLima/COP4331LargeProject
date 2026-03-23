@@ -1,7 +1,7 @@
 require('express');
 require('mongodb');
 
-exports.setApp = function(app, client)
+exports.setApp = function(app, client, cardList)
 {
     app.post('/api/addcard', async (req, res, next) =>
     {
@@ -26,7 +26,7 @@ exports.setApp = function(app, client)
         var error = '';
         try
         {
-            const db = client.db();
+            const db = client.db('COP4331Cards');
             const result = db.collection('Cards').insertOne(newCard);
         }
         catch(e)
@@ -46,6 +46,76 @@ exports.setApp = function(app, client)
         
         var ret = { error: error, jwtToken: refreshedToken };
         res.status(200).json(ret);
+    });
+
+    app.post('/api/seed', async (req, res, next) =>
+    {
+        // Seed the database with initial card list
+        var error = '';
+        var count = 0;
+        try
+        {
+            const db = client.db('COP4331Cards');
+            const cardsCollection = db.collection('Cards');
+            
+            // Clear existing cards
+            await cardsCollection.deleteMany({});
+            
+            // Insert all cards from cardList
+            const cardsData = cardList.map(card => ({ Card: card }));
+            const result = await cardsCollection.insertMany(cardsData);
+            count = result.insertedCount;
+        }
+        catch(e)
+        {
+            error = e.toString();
+        }
+
+        res.status(200).json({ error: error, count: count });
+    });
+
+    app.post('/api/register', async (req, res, next) =>
+    {
+        // incoming: firstName, lastName, login, password
+        // outgoing: error
+        var error = '';
+        const { firstName, lastName, login, password } = req.body;
+
+        if (!firstName || !lastName || !login || !password)
+        {
+            res.status(200).json({ error: 'All fields are required.' });
+            return;
+        }
+
+        try
+        {
+            const db = client.db('COP4331Cards');
+            const users = db.collection('Users');
+            const existingUser = await users.findOne({ Login: login });
+
+            if (existingUser)
+            {
+                res.status(200).json({ error: 'Username already exists.' });
+                return;
+            }
+
+            const lastUser = await users.find({ UserID: { $exists: true } }).sort({ UserID: -1 }).limit(1).toArray();
+            const nextUserId = lastUser.length > 0 ? (lastUser[0].UserID + 1) : 1;
+
+            await users.insertOne({
+                UserID: nextUserId,
+                FirstName: firstName,
+                LastName: lastName,
+                Login: login,
+                Password: password
+            });
+        }
+        catch(e)
+        {
+            error = e.toString();
+        }
+
+        res.status(200).json({ error: error });
     });
 
     app.post('/api/login', async (req, res, next) =>
@@ -111,7 +181,7 @@ exports.setApp = function(app, client)
         }
 
         var _search = search.trim();
-        const db = client.db();
+        const db = client.db('COP4331Cards');
         const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*',
         $options:'i'}}).toArray();
 
