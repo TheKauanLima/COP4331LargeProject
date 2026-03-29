@@ -74,6 +74,54 @@ exports.setApp = function(app, client, cardList)
         res.status(200).json({ error: error, count: count });
     });
 
+    app.post('/api/searchcards', async (req, res, next) =>
+    {
+        // incoming: userId, search
+        // outgoing: results[], error
+        var error = '';
+
+        const { userId, search, jwtToken } = req.body;
+        try
+        {
+            if( token.isExpired(jwtToken))
+            {
+                var r = {error:'The JWT is no longer valid', jwtToken: ''};
+                res.status(200).json(r);
+                return;
+            }
+        }
+        catch(e)
+        {
+            console.log(e.message);
+        }
+
+        var _search = search.trim();
+        const db = client.db('COP4331Cards');
+        const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*',
+        $options:'i'}}).toArray();
+
+        var _ret = [];
+        for( var i=0; i<results.length; i++ )
+        {
+            _ret.push( results[i].Card );
+        }
+
+        var refreshedToken = null;
+        try
+        {
+            refreshedToken = token.refresh(jwtToken);
+        }
+        catch(e)
+        {
+            console.log(e.message);
+        }
+
+        var ret = { results:_ret, error: error, jwtToken: refreshedToken };
+        res.status(200).json(ret);
+    });
+
+/// User APIs ///
+
     app.post('/api/register', async (req, res, next) =>
     {
         // incoming: firstName, lastName, login, password
@@ -159,49 +207,130 @@ exports.setApp = function(app, client, cardList)
         res.status(200).json(ret);
     });
 
-    app.post('/api/searchcards', async (req, res, next) =>
+    app.post('/api/getuser', async (req, res, next) =>
     {
-        // incoming: userId, search
-        // outgoing: results[], error
-        var error = '';
+    // incoming: userId
+    // outgoing: user, error
+    var error = '';
+    const { userId } = req.body;
 
-        const { userId, search, jwtToken } = req.body;
-        try
+    if (!userId)
+    {
+        res.status(200).json({ error: 'UserID is required.' });
+        return;
+    }
+
+    try
+    {
+        const db = client.db('COP4331Cards');
+        const user = await db.collection('Users').findOne(
+        { UserID: userId },
+        { projection: { _id: 0, Password: 0 } }
+        );
+
+        if (!user)
         {
-            if( token.isExpired(jwtToken))
-            {
-                var r = {error:'The JWT is no longer valid', jwtToken: ''};
-                res.status(200).json(r);
-                return;
+        res.status(200).json({ error: 'User not found.' });
+        return;
+        }
+
+        res.status(200).json({ user: user, error: '' });
+    }
+    catch (e)
+    {
+        error = e.toString();
+        res.status(200).json({ error: error });
+    }
+    });
+
+    app.post('/api/edituser', async (req, res, next) =>
+    {
+    // incoming: userId, firstName, lastName, login, password
+    // outgoing: error
+    var error = '';
+    const { userId, firstName, lastName, login, password } = req.body;
+
+    if (!userId || !firstName || !lastName || !login || !password)
+    {
+        res.status(200).json({ error: 'All fields are required.' });
+        return;
+    }
+
+    try
+    {
+        const db = client.db('COP4331Cards');
+        const users = db.collection('Users');
+
+        const existingUser = await users.findOne({
+        Login: login,
+        UserID: { $ne: userId }
+        });
+
+        if (existingUser)
+        {
+        res.status(200).json({ error: 'Username already exists.' });
+        return;
+        }
+
+        const result = await users.updateOne(
+        { UserID: userId },
+        {
+            $set: {
+            FirstName: firstName,
+            LastName: lastName,
+            Login: login,
+            Password: password
             }
         }
-        catch(e)
+        );
+
+        if (result.matchedCount === 0)
         {
-            console.log(e.message);
+        res.status(200).json({ error: 'User not found.' });
+        return;
         }
 
-        var _search = search.trim();
-        const db = client.db('COP4331Cards');
-        const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*',
-        $options:'i'}}).toArray();
-
-        var _ret = [];
-        for( var i=0; i<results.length; i++ )
-        {
-            _ret.push( results[i].Card );
-        }
-
-        var refreshedToken = null;
-        try
-        {
-            refreshedToken = token.refresh(jwtToken);
-        }
-        catch(e)
-        {
-            console.log(e.message);
-        }
-
-        var ret = { results:_ret, error: error, jwtToken: refreshedToken };
-        res.status(200).json(ret);
+        res.status(200).json({ error: '' });
+    }
+    catch (e)
+    {
+        error = e.toString();
+        res.status(200).json({ error: error });
+    }
     });
+
+    app.post('/api/deleteuser', async (req, res, next) =>
+    {
+    // incoming: userId
+    // outgoing: error
+    var error = '';
+    const { userId } = req.body;
+
+    if (!userId)
+    {
+        res.status(200).json({ error: 'UserID is required.' });
+        return;
+    }
+
+    try
+    {
+        const db = client.db('COP4331Cards');
+        const result = await db.collection('Users').deleteOne({ UserID: userId });
+
+        if (result.deletedCount === 0)
+        {
+        res.status(200).json({ error: 'User not found.' });
+        return;
+        }
+
+        res.status(200).json({ error: '' });
+    }
+    catch (e)
+    {
+        error = e.toString();
+        res.status(200).json({ error: error });
+    }
+    });
+
+
 }
