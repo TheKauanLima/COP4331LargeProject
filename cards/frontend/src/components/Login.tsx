@@ -21,9 +21,11 @@ function Login() {
     // Register State
     const [registerFirstName, setRegisterFirstName] = useState<string>('');
     const [registerLastName, setRegisterLastName] = useState<string>('');
+    const [registerEmail, setRegisterEmail] = useState<string>('');
     const [registerLogin, setRegisterLogin] = useState<string>('');
     const [registerPassword, setRegisterPassword] = useState<string>('');
     const [registerMessage, setRegisterMessage] = useState<string>('');
+    const [needsVerification, setNeedsVerification] = useState<boolean>(false);
 
     // --- Event Handlers (Strongly Typed) ---
     const handleSetLoginName = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -51,6 +53,14 @@ function Login() {
             });
 
             const res = JSON.parse(await response.text());
+            if (res?.verificationRequired) {
+                setNeedsVerification(true);
+                setMessage(res?.error ?? 'Please verify your email before logging in.');
+                setIsLoading(false);
+                return;
+            }
+
+            setNeedsVerification(false);
             const accessToken = res?.accessToken;
 
             if (typeof accessToken !== 'string' || accessToken.length === 0) {
@@ -93,10 +103,11 @@ function Login() {
 
         const firstName = registerFirstName.trim();
         const lastName = registerLastName.trim();
+        const email = registerEmail.trim().toLowerCase();
         const login = registerLogin.trim();
         const password = registerPassword;
 
-        if (!firstName || !lastName || !login || !password) {
+        if (!firstName || !lastName || !email || !login || !password) {
             setRegisterMessage('All fields are required.');
             setIsLoading(false);
             return;
@@ -105,7 +116,7 @@ function Login() {
         try {
             const response = await fetch(buildPath('api/register'), {
                 method: 'POST',
-                body: JSON.stringify({ firstName, lastName, login, password }),
+                body: JSON.stringify({ firstName, lastName, email, login, password }),
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -117,15 +128,50 @@ function Login() {
                 return;
             }
 
-            setRegisterMessage('Account created. You can now log in.');
+            setRegisterMessage(res?.message ?? 'Account created. Please verify your email.');
             setLoginName(login);
             setPassword('');
             setRegisterFirstName('');
             setRegisterLastName('');
+            setRegisterEmail('');
             setRegisterLogin('');
             setRegisterPassword('');
         } catch (error: any) {
             setRegisterMessage(error.toString());
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const doResendVerification = async (event: MouseEvent<HTMLInputElement>): Promise<void> => {
+        event.preventDefault();
+        setIsLoading(true);
+        setMessage('');
+
+        const loginOrEmail = loginName.trim();
+        if (!loginOrEmail) {
+            setMessage('Enter your username or email to resend verification.');
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(buildPath('api/resend-verification'), {
+                method: 'POST',
+                body: JSON.stringify({ loginOrEmail }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const res = JSON.parse(await response.text());
+            if (res?.error) {
+                setMessage(res.error);
+                setIsLoading(false);
+                return;
+            }
+
+            setMessage(res?.message ?? 'Verification email sent.');
+        } catch (error: any) {
+            setMessage(error.toString());
         } finally {
             setIsLoading(false);
         }
@@ -143,6 +189,16 @@ function Login() {
             
             <input type="submit" id="loginButton" className="buttons" value={isLoading ? "Loading..." : "Do It"}
             onClick={doLogin} disabled={isLoading} />
+            {needsVerification && (
+                <input
+                    type="submit"
+                    id="resendVerificationButton"
+                    className="buttons"
+                    value={isLoading ? 'Loading...' : 'Resend Verification Email'}
+                    onClick={doResendVerification}
+                    disabled={isLoading}
+                />
+            )}
             <span id="loginResult">{message}</span>
 
             <hr style={{ margin: '20px 0' }} />
@@ -154,6 +210,9 @@ function Login() {
             
             Last Name: <input type="text" id="registerLastName" placeholder="Last name"
             value={registerLastName} onChange={(e) => setRegisterLastName(e.target.value)} disabled={isLoading} /><br />
+
+            Email: <input type="email" id="registerEmail" placeholder="Email"
+            value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} disabled={isLoading} /><br />
             
             Username: <input type="text" id="registerLogin" placeholder="Username"
             value={registerLogin} onChange={(e) => setRegisterLogin(e.target.value)} disabled={isLoading} /><br />

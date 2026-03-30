@@ -123,6 +123,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 import LoginPage from './components/pages/LoginPage';
 import CardPage from './components/pages/CardPage';
+import VerifyEmailPage from './components/pages/VerifyEmailPage';
 
 function App() {
   return (
@@ -130,6 +131,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/cards" element={<CardPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
       </Routes>
     </BrowserRouter>
   );
