@@ -1,4 +1,4 @@
-import React, { useState, type ChangeEvent, type MouseEvent } from 'react';
+import { useState, type ChangeEvent, type MouseEvent } from 'react';
 import { buildPath } from './Path';
 import { storeToken } from '../tokenStorage';
 import { jwtDecode, type JwtPayload } from 'jwt-decode';
