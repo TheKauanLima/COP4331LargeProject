@@ -1,7 +1,7 @@
 function PageTitle()
 {
     return(
-        <h1 id="title">Awesome Movie Recommender</h1>
+        <h1 id="title">FilmBuff</h1>
     );
 };
 
