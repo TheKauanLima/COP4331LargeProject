@@ -84,6 +84,7 @@ function CardUI()
             alert(error.toString());
             setResults(error.toString());
         }
+        
     };
 
     return(
