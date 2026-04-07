@@ -448,40 +448,56 @@ exports.setApp = function(app, client, cardList)
 
     app.post('/api/getuser', async (req, res, next) =>
     {
-    // incoming: userId
-    // outgoing: user, error
-    var error = '';
-    const { userId } = req.body;
+        // incoming: userId
+        // outgoing: user, error
+        var error = '';
+        const { userId } = req.body;
 
-    if (!userId)
-    {
-        res.status(200).json({ error: 'UserID is required.' });
-        return;
-    }
-
-    try
-    {
-        const db = client.db('COP4331Cards');
-        const user = await db.collection('Users').findOne(
-        { UserID: userId },
-        { projection: { _id: 0, Password: 0 } }
-        );
-
-        if (!user)
+        if (!userId)
         {
-        res.status(200).json({ error: 'User not found.' });
-        return;
+            res.status(200).json({ error: 'UserID is required.' });
+            return;
         }
 
-        res.status(200).json({ user: user, error: '' });
-    }
-    catch (e)
-    {
-        error = e.toString();
-        res.status(200).json({ error: error });
-    }
-    });
+        try
+        {
+            const db = client.db('COP4331Cards');
+            const user = await db.collection('Users').findOne(
+                { UserID: userId },
+                {
+                    projection: {
+                        _id: 0,
+                        Password: 0,
+                        VerificationTokenHash: 0,
+                        VerificationTokenExpires: 0
+                    }
+                }
+            );
 
+            if (!user)
+            {
+                res.status(200).json({ error: 'User not found.' });
+                return;
+            }
+
+            if (!user.watchList)
+            {
+                user.watchList = [];
+            }
+
+            if (!user.watchedMovies)
+            {
+                user.watchedMovies = [];
+            }
+
+            res.status(200).json({ user: user, error: '' });
+        }
+        catch (e)
+        {
+            error = e.toString();
+            res.status(200).json({ error: error });
+        }
+    });
     app.post('/api/edituser', async (req, res, next) =>
     {
     // incoming: userId, firstName, lastName, login, password
