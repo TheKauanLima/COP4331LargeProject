@@ -12,6 +12,7 @@ export function storeToken( tok:any ) : any
     {
         console.log(e);
     }
+    
 }
 
 export function retrieveToken() : any

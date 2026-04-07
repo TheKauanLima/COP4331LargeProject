@@ -20,8 +20,8 @@ jobs:
         node-version: '22.18'
         cache: 'npm'
         cache-dependency-path: |
-          package-lock.json
-          frontend/package-lock.json
+          cards/package-lock.json
+          cards/frontend/package-lock.json
 
     # Install and build frontend
     - name: Install frontend dependencies
@@ -40,9 +40,9 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
-        source: "cards/frontend/dist/*"
+        source: "cards/frontend/dist/**"
         target: "/var/www/html"
-        strip_components: 2
+        strip_components: 3
         rm: true
 
     # Deploy backend files to server
@@ -53,8 +53,9 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
-        source: "cards/server.js,cards/package.json,cards/package-lock.json"
+        source: "cards/server.js,cards/package.json,cards/package-lock.json,cards/api.js,cards/createJWT.js"
         target: "/var/cardsServer"
+        strip_components: 1
         overwrite: true
 
     # Install backend dependencies and restart PM2
@@ -68,6 +69,18 @@ jobs:
         script: |
           # Navigate to backend directory
           cd /var/cardsServer
+
+          # Write runtime environment variables for Node.js
+          cat > .env << 'EOF'
+          PORT=5000
+          MONGO_URL=${{ secrets.MONGO_URL }}
+          ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM_NAME=${{ secrets.EMAIL_FROM_NAME }}
+          EMAIL_FROM_ADDRESS=${{ secrets.EMAIL_FROM_ADDRESS }}
+          EOF
 
           # Install dependencies
           npm ci --production
