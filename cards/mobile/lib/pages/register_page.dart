@@ -28,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
   if (!mounted) return;
 
   if (res['error'] == null || res['error'] == "") {
-    // Success! Show a message instead of a code dialog
+    //Show a message instead of a code dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -85,7 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
       appBar: AppBar(title: const Text("Create Account")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView( // Prevents keyboard overlap
+        child: SingleChildScrollView( //Prevents keyboard overlap
           child: Column(
             children: [
               TextField(controller: _firstNameController, decoration: const InputDecoration(labelText: "First Name")),

@@ -5,7 +5,7 @@ class UserModel {
 
   UserModel({required this.userId, required this.firstName, required this.lastName});
 
-  // This maps the JSON from your Express API to the Dart object
+  //maps the JSON from Express API to the Dart object
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       userId: json['userId'] ?? 0,

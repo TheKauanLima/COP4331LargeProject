@@ -14,23 +14,31 @@ class _LoginPageState extends State<LoginPage> {
   String _message = '';
 
   void _doLogin() async {
-    final service = AuthService();
-    final res = await service.login(_loginController.text, _passwordController.text);
+  //Call login logic
+  final result = await AuthService().login(
+    _loginController.text, 
+    _passwordController.text
+  );
 
-    if (res['accessToken'] != null) {
-      // Success! Navigate to your main page
-      Navigator.pushReplacementNamed(context, '/movies');
-    } else {
-      setState(() {
-        _message = res['error'] ?? 'Login failed';
-      });
-    }
+  //Check if the user didn't close the app/page while waiting
+  if (!mounted) return;
+
+  //Check the result from API
+  if (result['error'] == null || result['error'] == "") {
+    //Move to the movies page
+    Navigator.pushReplacementNamed(context, '/movies');
+  } else {
+    //Show the error message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result['error'])),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Movie Login")),
+      appBar: AppBar(title: const Text("FilmBuffs Login")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
