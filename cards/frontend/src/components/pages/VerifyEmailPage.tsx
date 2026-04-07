@@ -49,10 +49,37 @@ function VerifyEmailPage() {
     }, [searchParams]);
 
     return (
-        <div id="verifyEmailDiv">
-            <h2>Email Verification</h2>
-            <p style={{ color: isError ? '#b00020' : '#0a7a2f' }}>{message}</p>
-            <Link to="/">Go back to Login</Link>
+        <div className="film-auth-page">
+            
+            <h1 className="main-logo">FilmBuffs</h1>
+
+            <div className="auth-card" style={{ maxWidth: '500px', textAlign: 'center' }}>
+                <div className="auth-section">
+                    <h2 className="auth-title">Email Verification</h2>
+                    
+                    {/* Status Message */}
+                    <div style={{ margin: '2rem 0', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <p style={{ 
+                            fontSize: '1.1rem', 
+                            fontWeight: '500', 
+                            // Gray while loading, Red for error, Green for success
+                            color: message === 'Verifying your email...' ? '#444' : (isError ? '#d32f2f' : '#0a7a2f') 
+                        }}>
+                            {message}
+                        </p>
+                    </div>
+
+                    {/* Styled Link to look like a button */}
+                    <Link 
+                        to="/" 
+                        className="auth-btn primary-btn" 
+                        style={{ textDecoration: 'none', display: 'block', boxSizing: 'border-box' }}
+                    >
+                        Return to Login
+                    </Link>
+                </div>
+            </div>
+            
         </div>
     );
 }

@@ -1,16 +1,17 @@
 :root {
+  /* Existing Variables */
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
+  /* --- NEW FILMBUFFS THEME COLORS --- */
+  --fb-bg: #4F6367;
+  --fb-card: #B8D8D8;
+  --fb-light: #EEF5DB;
+
+  /* Typography */
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -18,94 +19,345 @@
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+/* =========================================
+   BASE HTML & ROOT
+========================================= */
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  /* Removed the 1126px hard limit so the dashboard can be full-width */
+  width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
+h1, h2 {
   font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+h1 { font-size: 56px; margin: 32px 0; }
+h2 { font-size: 24px; margin: 0 0 8px; }
+p { margin: 0; }
+
+/* Existing Button Style (Used in Login/Cards) */
+.buttons {
+  background-color: var(--fb-card);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 5px;
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+.buttons:hover {
+  background-color: var(--fb-light);
 }
-p {
+
+/* =========================================
+   DASHBOARD PAGE STYLES
+========================================= */
+.film-dashboard {
+  background-color: var(--fb-bg);
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 3rem;
+  box-sizing: border-box;
+  text-align: left; /* Overrides the center alignment from #root */
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-logo {
+  color: var(--fb-light);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* Search Bar */
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 600px;
+  margin: 0 2rem;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  padding-right: 2.5rem;
+  border-radius: 4px;
+  border: none;
+  background-color: var(--fb-light);
+  color: #333;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* Tabs */
+.tabs-wrapper {
+  margin-bottom: 2.5rem;
+}
+
+.tabs-container {
+  display: inline-flex;
+  background-color: var(--fb-light);
+  padding: 5px;
+  border-radius: 50px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.active-tab {
+  background-color: var(--fb-card);
+  color: #000;
+}
+
+.inactive-tab {
+  background-color: transparent;
+  color: #333;
+}
+
+.inactive-tab:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Movie Grid */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 2rem;
+  max-width: 1200px;
+}
+
+.movie-card {
+  background-color: var(--fb-card);
+  border-radius: 24px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.movie-image-placeholder {
+  background-color: var(--bg);
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.movie-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 0.25rem 0;
+}
+
+.movie-year {
+  font-size: 0.9rem;
+  color: #444;
+  margin: 0 0 1rem 0;
+}
+
+.movie-rating {
+  display: flex;
+  gap: 4px;
+  margin-top: auto;
+}
+
+/* Icons */
+.icon-search { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #666; }
+.icon-user { width: 36px; height: 36px; color: var(--fb-light); cursor: pointer; }
+.icon-bookmark { width: 18px; height: 18px; color: #000; }
+.icon-camera { width: 64px; height: 64px; color: #555; }
+.icon-star { width: 20px; height: 20px; color: #eab308; }
+
+.film-auth-page {
+  background-color: var(--fb-bg);
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* <-- ADD THIS LINE */
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Add this new block */
+.main-logo {
+  color: var(--fb-light); /* Uses your beige color so it pops against the teal */
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 2rem 0; /* Adds space between the logo and the card */
+  letter-spacing: 1px;
+  text-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Slight shadow to make it stand out */
+}
+
+.auth-card {
+  background-color: var(--fb-card);
+  border-radius: 24px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  max-width: 900px;
+  width: 100%;
+  overflow: hidden;
+  text-align: left;
+}
+
+.auth-section {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.auth-title {
+  color: #000;
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.auth-subtitle {
+  color: #444;
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.auth-divider {
+  width: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: var(--fb-light);
+  color: #333;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  border-color: #000;
+}
+
+.form-input::placeholder {
+  color: #888;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+  font-family: inherit;
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background-color: #000;
+  color: var(--fb-light);
+  margin-top: auto;
+}
+
+.primary-btn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.secondary-btn {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #000;
+  margin-top: 0.5rem;
+}
+
+.auth-msg {
+  color: #d32f2f; /* Error red */
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  text-align: center;
+  min-height: 20px;
+}
+
+/* Mobile Responsiveness for Auth Card */
+@media (max-width: 768px) {
+  .auth-card {
+    flex-direction: column;
+  }
+  
+  .auth-divider {
+    width: auto;
+    height: 1px;
+    margin: 0 2rem;
+  }
+  
+  .auth-section {
+    padding: 2rem;
+  }
 }
