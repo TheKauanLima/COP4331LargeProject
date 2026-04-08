@@ -122,16 +122,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 import LoginPage from './components/pages/LoginPage';
-import CardPage from './components/pages/CardPage';
 import VerifyEmailPage from './components/pages/VerifyEmailPage';
+import DashboardPage from './components/pages/DashboardPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/cards" element={<CardPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
     </BrowserRouter>
   );

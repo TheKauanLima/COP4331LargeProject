@@ -37,7 +37,7 @@ function Login() {
     };
 
     // --- API Calls ---
-    const doLogin = async (event: MouseEvent<HTMLInputElement>): Promise<void> => {
+    const doLogin = async (event: MouseEvent<HTMLButtonElement>): Promise<void> => {
         event.preventDefault();
         setIsLoading(true);
         setMessage('');
@@ -83,7 +83,7 @@ function Login() {
                     const user = { firstName, lastName, id: userId };
                     localStorage.setItem('user_data', JSON.stringify(user));
                     setMessage('');
-                    window.location.href = '/cards';
+                    window.location.href = '/dashboard';
                 }
             } catch (e) {
                 console.error("Token decoding error:", e);
@@ -96,7 +96,7 @@ function Login() {
         }
     };
 
-    const doRegister = async (event: MouseEvent<HTMLInputElement>): Promise<void> => {
+    const doRegister = async (event: MouseEvent<HTMLButtonElement>): Promise<void> => {
         event.preventDefault();
         setIsLoading(true);
         setRegisterMessage('');
@@ -143,7 +143,7 @@ function Login() {
         }
     };
 
-    const doResendVerification = async (event: MouseEvent<HTMLInputElement>): Promise<void> => {
+    const doResendVerification = async (event: MouseEvent<HTMLButtonElement>): Promise<void> => {
         event.preventDefault();
         setIsLoading(true);
         setMessage('');
@@ -178,51 +178,60 @@ function Login() {
     };
 
     return (
-        <div id="loginDiv">
-            <span id="inner-title">PLEASE LOG IN</span><br />
+        <div className="film-auth-page">
             
-            Login: <input type="text" id="loginName" placeholder="Username"
-            value={loginName} onChange={handleSetLoginName} disabled={isLoading} /><br />
-            
-            Password: <input type="password" id="loginPassword" placeholder="Password"
-            value={loginPassword} onChange={handleSetPassword} disabled={isLoading} /><br />
-            
-            <input type="submit" id="loginButton" className="buttons" value={isLoading ? "Loading..." : "Do It"}
-            onClick={doLogin} disabled={isLoading} />
-            {needsVerification && (
-                <input
-                    type="submit"
-                    id="resendVerificationButton"
-                    className="buttons"
-                    value={isLoading ? 'Loading...' : 'Resend Verification Email'}
-                    onClick={doResendVerification}
-                    disabled={isLoading}
-                />
-            )}
-            <span id="loginResult">{message}</span>
+            {/* NEW PLACEMENT: Title at the very top of the page */}
+            <h1 className="main-logo">FilmBuffs</h1>
 
-            <hr style={{ margin: '20px 0' }} />
-            
-            <span id="register-title">CREATE ACCOUNT</span><br />
-            
-            First Name: <input type="text" id="registerFirstName" placeholder="First name"
-            value={registerFirstName} onChange={(e) => setRegisterFirstName(e.target.value)} disabled={isLoading} /><br />
-            
-            Last Name: <input type="text" id="registerLastName" placeholder="Last name"
-            value={registerLastName} onChange={(e) => setRegisterLastName(e.target.value)} disabled={isLoading} /><br />
+            <div className="auth-card">
+                
+                {/* LOGIN SECTION */}
+                <div className="auth-section">
+                    <h2 className="auth-title">Welcome Back</h2>
+                    <p className="auth-subtitle">Please log in to continue.</p>
+                    
+                    <form className="auth-form">
+                        <input type="text" className="form-input" placeholder="Username" value={loginName} onChange={handleSetLoginName} disabled={isLoading} />
+                        <input type="password" className="form-input" placeholder="Password" value={loginPassword} onChange={handleSetPassword} disabled={isLoading} />
+                        
+                        <button className="auth-btn primary-btn" onClick={doLogin} disabled={isLoading}>
+                            {isLoading ? "Loading..." : "Log In"}
+                        </button>
+                        
+                        {needsVerification && (
+                            <button className="auth-btn secondary-btn mt-2" onClick={doResendVerification} disabled={isLoading}>
+                                {isLoading ? 'Loading...' : 'Resend Verification Email'}
+                            </button>
+                        )}
+                        <span className="auth-msg">{message}</span>
+                    </form>
+                </div>
 
-            Email: <input type="email" id="registerEmail" placeholder="Email"
-            value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} disabled={isLoading} /><br />
-            
-            Username: <input type="text" id="registerLogin" placeholder="Username"
-            value={registerLogin} onChange={(e) => setRegisterLogin(e.target.value)} disabled={isLoading} /><br />
-            
-            Password: <input type="password" id="registerPassword" placeholder="Password"
-            value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} disabled={isLoading} /><br />
-            
-            <input type="submit" id="registerButton" className="buttons" value={isLoading ? "Loading..." : "Create Account"}
-            onClick={doRegister} disabled={isLoading} />
-            <span id="registerResult">{registerMessage}</span>
+                {/* DIVIDER */}
+                <div className="auth-divider"></div>
+
+                {/* REGISTER SECTION */}
+                <div className="auth-section">
+                    <h2 className="auth-title">Create Account</h2>
+                    <p className="auth-subtitle">New here? Sign up for free.</p>
+                    
+                    <form className="auth-form">
+                        <div className="form-row">
+                            <input type="text" className="form-input" placeholder="First Name" value={registerFirstName} onChange={(e) => setRegisterFirstName(e.target.value)} disabled={isLoading} />
+                            <input type="text" className="form-input" placeholder="Last Name" value={registerLastName} onChange={(e) => setRegisterLastName(e.target.value)} disabled={isLoading} />
+                        </div>
+                        <input type="email" className="form-input" placeholder="Email Address" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} disabled={isLoading} />
+                        <input type="text" className="form-input" placeholder="Username" value={registerLogin} onChange={(e) => setRegisterLogin(e.target.value)} disabled={isLoading} />
+                        <input type="password" className="form-input" placeholder="Password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} disabled={isLoading} />
+                        
+                        <button className="auth-btn primary-btn" onClick={doRegister} disabled={isLoading}>
+                            {isLoading ? "Loading..." : "Create Account"}
+                        </button>
+                        <span className="auth-msg">{registerMessage}</span>
+                    </form>
+                </div>
+
+            </div>
         </div>
     );
 }
