@@ -10,9 +10,8 @@ _createToken = function ( fn, ln, id )
 {
     try
     {
-        const expiration = new Date();
         const user = {userId:id,firstName:fn,lastName:ln};
-        const accessToken = jwt.sign( user, process.env.ACCESS_TOKEN_SECRET);
+        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
         // In order to expire with a value other than the default, use the
         // following
         /*
@@ -50,16 +49,7 @@ exports.isExpired = function( token )
 exports.refresh = function( token )
 {
     var ud = jwt.decode(token,{complete:true});
-    var userId = ud.payload.id;
-    var firstName = ud.payload.firstName;
-    var lastName = ud.payload.lastName;
-    return _createToken( firstName, lastName, userId );
-}
-
-exports.refresh = function( token )
-{
-    var ud = jwt.decode(token,{complete:true});
-    var userId = ud.payload.id;
+    var userId = ud.payload.userId;
     var firstName = ud.payload.firstName;
     var lastName = ud.payload.lastName;
     return _createToken( firstName, lastName, userId );
