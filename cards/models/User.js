@@ -5,7 +5,10 @@ const movieSchema = new mongoose.Schema(
         id: { type: Number, required: true },
         title: { type: String, required: true },
         poster_path: { type: String, default: '' },
-        release_date: { type: String, default: '' }
+        release_date: { type: String, default: '' },
+        director: { type: String, default: '' },
+        genres: { type: [String], default: [] },
+        userRating: { type: Number, min: 1, max: 5, default: null }
     },
     { _id: false }
 );
