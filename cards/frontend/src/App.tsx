@@ -124,6 +124,8 @@ import './App.css';
 import LoginPage from './components/pages/LoginPage';
 import VerifyEmailPage from './components/pages/VerifyEmailPage';
 import DashboardPage from './components/pages/DashboardPage';
+import ForgotPasswordPage from './components/pages/ForgotPasswordPage';
+import ResetPasswordPage from './components/pages/ResetPasswordPage';
 
 function App() {
   return (
@@ -131,6 +133,8 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
     </BrowserRouter>

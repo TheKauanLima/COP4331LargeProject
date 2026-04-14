@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema(
         IsEmailVerified: { type: Boolean, default: false },
         VerificationTokenHash: { type: String, default: null },
         VerificationTokenExpires: { type: Date, default: null },
+        resetPasswordToken: { type: String, default: null },
+        resetPasswordExpires: { type: Date, default: null },
         watchList: { type: [movieSchema], default: [] },
         watchedMovies: { type: [movieSchema], default: [] }
     },

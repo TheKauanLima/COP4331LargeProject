@@ -7,12 +7,14 @@ const {
     verifyPassword,
     createVerificationToken,
     hashVerificationToken,
-    sendVerificationEmail
+    sendVerificationEmail,
+    sendPasswordResetEmail
 } = require('../utils/authUtils');
 
 module.exports = function createAuthRoutes()
 {
     const router = express.Router();
+    const crypto = require('crypto');
 
     router.post('/register', async (req, res, next) =>
     {
@@ -240,6 +242,101 @@ module.exports = function createAuthRoutes()
             await sendVerificationEmail(user.Email, verificationToken);
 
             res.status(200).json({ error: '', message: 'Verification email sent.' });
+        }
+        catch (e)
+        {
+            res.status(200).json({ error: e.toString() });
+        }
+    });
+
+    router.post('/forgot-password', async (req, res, next) =>
+    {
+        // incoming: email
+        // outgoing: error, message
+        const { email } = req.body;
+
+        if (!email)
+        {
+            res.status(200).json({ error: 'Email is required.' });
+            return;
+        }
+
+        try
+        {
+            const user = await User.findOne({ Email: email });
+
+            // For security, always return success even if email doesn't exist
+            if (!user)
+            {
+                res.status(200).json({ error: '', message: 'If this email exists in our system, you will receive a password reset link.' });
+                return;
+            }
+
+            // Generate secure reset token
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+            // Save token and expiration to user
+            await User.updateOne(
+                { _id: user._id },
+                {
+                    $set: {
+                        resetPasswordToken: resetToken,
+                        resetPasswordExpires: resetTokenExpires
+                    }
+                }
+            );
+
+            // Send password reset email
+            await sendPasswordResetEmail(user.Email, resetToken);
+
+            res.status(200).json({ error: '', message: 'If this email exists in our system, you will receive a password reset link.' });
+        }
+        catch (e)
+        {
+            res.status(200).json({ error: e.toString() });
+        }
+    });
+
+    router.post('/reset-password', async (req, res, next) =>
+    {
+        // incoming: token, newPassword
+        // outgoing: error, message
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword)
+        {
+            res.status(200).json({ error: 'Token and new password are required.' });
+            return;
+        }
+
+        try
+        {
+            // Find user with valid reset token and expiration
+            const user = await User.findOne({
+                resetPasswordToken: token,
+                resetPasswordExpires: { $gt: new Date() }
+            });
+
+            if (!user)
+            {
+                res.status(200).json({ error: 'Password reset token is invalid or has expired.' });
+                return;
+            }
+
+            // Hash the new password
+            const hashedPassword = await hashPassword(newPassword);
+
+            // Update user password and clear reset tokens
+            await User.updateOne(
+                { _id: user._id },
+                {
+                    $set: { Password: hashedPassword },
+                    $unset: { resetPasswordToken: '', resetPasswordExpires: '' }
+                }
+            );
+
+            res.status(200).json({ error: '', message: 'Your password has been reset successfully. You can now log in with your new password.' });
         }
         catch (e)
         {

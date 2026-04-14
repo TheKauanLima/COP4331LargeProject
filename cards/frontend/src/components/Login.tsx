@@ -2,6 +2,7 @@ import { useState, type ChangeEvent, type MouseEvent } from 'react';
 import { buildPath } from './Path';
 import { storeToken } from '../tokenStorage';
 import { jwtDecode, type JwtPayload } from 'jwt-decode';
+import { Link } from 'react-router-dom';
 
 type AppTokenPayload = JwtPayload & {
     userId?: number;
@@ -197,6 +198,10 @@ function Login() {
                         <button className="auth-btn primary-btn" onClick={doLogin} disabled={isLoading}>
                             {isLoading ? "Loading..." : "Log In"}
                         </button>
+                        
+                        <Link to="/forgot-password" style={{ textAlign: 'center', display: 'block', marginTop: '1rem', color: '#555', textDecoration: 'none', fontSize: '0.9rem' }}>
+                            Forgot Password?
+                        </Link>
                         
                         {needsVerification && (
                             <button className="auth-btn secondary-btn mt-2" onClick={doResendVerification} disabled={isLoading}>
