@@ -80,11 +80,45 @@ async function sendVerificationEmail(email, token)
     });
 }
 
+async function sendPasswordResetEmail(email, token)
+{
+    if (emailService !== 'resend')
+    {
+        throw new Error('EMAIL_SERVICE must be set to resend.');
+    }
+
+    if (!resendClient)
+    {
+        throw new Error('RESEND_API_KEY is not configured.');
+    }
+
+    if (!verificationSender)
+    {
+        throw new Error('EMAIL_FROM_NAME and EMAIL_FROM_ADDRESS must be configured.');
+    }
+
+    const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(token)}`;
+
+    await resendClient.emails.send({
+        from: verificationSender,
+        to: email,
+        subject: 'Reset your password',
+        html: `
+            <h2>Password Reset Request</h2>
+            <p>Click the link below to reset your password:</p>
+            <p><a href="${resetLink}">${resetLink}</a></p>
+            <p>This link expires in 1 hour.</p>
+            <p>If you didn't request a password reset, please ignore this email.</p>
+        `
+    });
+}
+
 module.exports = {
     isBcryptHash,
     hashPassword,
     verifyPassword,
     createVerificationToken,
     hashVerificationToken,
-    sendVerificationEmail
+    sendVerificationEmail,
+    sendPasswordResetEmail
 };
