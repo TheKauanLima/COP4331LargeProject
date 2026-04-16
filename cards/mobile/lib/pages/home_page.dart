@@ -10,89 +10,125 @@ class MovieHomePage extends StatefulWidget {
 }
 
 class _MovieHomePageState extends State<MovieHomePage> {
-  // 1. Define variables once
   late String userId;
   late String jwtToken;
-  bool isInitialized = false; // To prevent double-loading
+  bool isInitialized = false;
 
-  bool showSaved = true;
+  bool showSaved = true; 
   List<dynamic> savedMovies = [];
-  List<dynamic> watchedMovies = [];
-  List<dynamic> searchResults = []; // List to hold search results
-  bool isSearching = false; // To toggle between saved/watched and search results
+  List<dynamic> recommendedMovies = [];
+  List<dynamic> searchResults = [];
+  
+  bool isSearching = false;
   bool isLoading = true;
+  String recommendationsMessage = '';
 
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // 2. Extract arguments correctly once
     if (!isInitialized) {
       final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
       userId = args['userId'].toString();
       jwtToken = args['token'];
       isInitialized = true;
-      _loadData(); // Load initial watchlist
+      _loadData(); 
     }
   }
 
-Future<void> _loadData() async {
-  setState(() => isLoading = true);
-  final data = await MovieService().getUserWatchlist(userId, jwtToken);
-setState(() {
-  // Use 'watchList' with a capital L to match your React code
-  savedMovies = data['watchList'] ?? []; 
-});
-  
-  // ADD THIS PRINT LINE:
-  print("FULL USER DATA FROM SERVER: $data");
+  // --- DATA FETCHING ---
 
-  if (mounted) {
-    setState(() {
-      // Update these keys based on what the print statement shows!
-      savedMovies = data['watchList'] ?? []; 
-      isLoading = false;
-    });
+  Future<void> _loadData() async {
+    setState(() => isLoading = true);
+    final data = await MovieService().getUserWatchlist(userId, jwtToken);
+    
+    if (mounted) {
+      setState(() {
+        if (data['error'] != null && data['error'].toString().contains("JWT")) {
+          Navigator.pushReplacementNamed(context, '/');
+          return;
+        }
+        savedMovies = data['watchList'] ?? []; 
+        isLoading = false;
+      });
+    }
   }
-}
 
-  // 3. Renamed to _onSearch to match your TextField call
-// Inside _MovieHomePageState in home_page.dart
-void _onSearch(String query) async {
-  if (query.trim().length < 2) return;
+  Future<void> _fetchRecommendations() async {
+    if (recommendedMovies.isNotEmpty) return;
 
-  setState(() {
-    isLoading = true;
-    isSearching = true;
-  });
+    setState(() => isLoading = true);
+    var watchedData = await MovieService().getWatchedMovies(userId, jwtToken);
+    List<dynamic> sourceMovies = watchedData['watchedMovies'] ?? [];
 
-  // Pass all 3: userId, query, and jwtToken
-  final response = await MovieService().searchMovies(userId, query, jwtToken);
+    if (sourceMovies.isEmpty) {
+      sourceMovies = savedMovies;
+    }
 
-  if (mounted) {
-    setState(() {
-      // Your React code showed results are inside the 'results' key
-      searchResults = response['results'] ?? [];
-      isLoading = false;
-    });
+    if (sourceMovies.isNotEmpty) {
+      var similarData = await MovieService().getSimilarMovies(sourceMovies, jwtToken);
+      if (mounted) {
+        setState(() {
+          recommendedMovies = similarData['results'] ?? [];
+          recommendationsMessage = recommendedMovies.isEmpty 
+              ? 'No recommendations found yet.' 
+              : '';
+          isLoading = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          recommendationsMessage = 'Add some movies to get recommendations!';
+          isLoading = false;
+        });
+      }
+    }
   }
-}
+
+  void _onSearch(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() => isSearching = false);
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      isSearching = true;
+    });
+
+    final response = await MovieService().searchMovies(userId, query, jwtToken);
+
+    if (mounted) {
+      setState(() {
+        searchResults = response['results'] ?? [];
+        isLoading = false;
+      });
+    }
+  }
 
   void _handleLogout(BuildContext context) async {
     await TokenStorage.clearToken();
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
+  // --- UI BUILDERS ---
+
   @override
   Widget build(BuildContext context) {
-    // Determine which list to show: Search results take priority if searching
     List<dynamic> currentList;
+    String emptyMessage = "No movies found";
+
     if (isSearching) {
       currentList = searchResults;
+      emptyMessage = "No search results for \"${_searchController.text}\"";
+    } else if (showSaved) {
+      currentList = savedMovies;
+      emptyMessage = "Your watchlist is empty!";
     } else {
-      currentList = showSaved ? savedMovies : watchedMovies;
+      currentList = recommendedMovies;
+      emptyMessage = recommendationsMessage;
     }
 
     return Scaffold(
@@ -100,7 +136,7 @@ void _onSearch(String query) async {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("FilmBuffs", style: TextStyle(color: Colors.white)),
+        title: const Text("FilmBuffs", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) => value == 'logout' ? _handleLogout(context) : null,
@@ -122,27 +158,27 @@ void _onSearch(String query) async {
                 filled: true,
                 hintText: 'Search movies...',
                 prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    _onSearch(""); // Reset search
-                  },
-                ),
+                suffixIcon: isSearching 
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => isSearching = false);
+                      },
+                    )
+                  : null,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onSubmitted: (value) => _onSearch(value),
             ),
           ),
           const SizedBox(height: 20),
-          if (!isSearching) _buildTogglePill(), // Only show toggle if not searching
-          if (isSearching) 
-            const Text("Search Results", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          if (!isSearching) _buildTogglePill(), 
           const SizedBox(height: 20),
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                : _buildGrid(currentList),
+                : _buildGrid(currentList, emptyMessage),
           ),
         ],
       ),
@@ -154,13 +190,18 @@ void _onSearch(String query) async {
       width: 320,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9),
+        color: const Color(0xFFE8F5E9).withOpacity(0.9),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         children: [
-          _toggleButton("My Saved Movies", showSaved, () => setState(() => showSaved = true)),
-          _toggleButton("Recommended", !showSaved, () => setState(() => showSaved = false)),
+          _toggleButton("My Saved Movies", showSaved, () {
+            setState(() => showSaved = true);
+          }),
+          _toggleButton("Recommended", !showSaved, () {
+            setState(() => showSaved = false);
+            _fetchRecommendations(); 
+          }),
         ],
       ),
     );
@@ -184,71 +225,192 @@ void _onSearch(String query) async {
     );
   }
 
-  Widget _buildGrid(List<dynamic> list) {
-    if (list.isEmpty) {
-      return const Center(child: Text("No movies found", style: TextStyle(color: Colors.white70)));
-    }
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, 
-        childAspectRatio: 0.75, 
-        crossAxisSpacing: 16, 
-        mainAxisSpacing: 16,
+  Widget _buildGrid(List<dynamic> list, String emptyMsg) {
+  if (list.isEmpty) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Text(
+          emptyMsg, 
+          textAlign: TextAlign.center, 
+          style: const TextStyle(color: Colors.white70, fontSize: 16)
+        ),
       ),
-      itemCount: list.length,
-      itemBuilder: (context, index) => MovieCard(movieData: list[index]),
     );
   }
+
+  return GridView.builder(
+    padding: const EdgeInsets.all(16),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2, 
+      childAspectRatio: 0.72, 
+      crossAxisSpacing: 14, 
+      mainAxisSpacing: 14,
+    ),
+    itemCount: list.length,
+    itemBuilder: (context, index) {
+      final movie = list[index];
+      
+      // Determine if we show the Trash icon (delete) or Plus icon (save)
+      bool isDeletable = showSaved && !isSearching;
+
+      return MovieCard(
+        movieData: movie,
+        isSaved: isDeletable,
+        userId: userId,     // Required for instant rating
+        jwtToken: jwtToken, // Required for instant rating
+        onIconTap: () async {
+          if (isDeletable) {
+            // Updated to use the corrected remove call
+            await MovieService().deleteFromWatchlist(userId, movie['id'], jwtToken);
+            _loadData(); // Refresh to remove the card from view
+          } else {
+            // Save movie logic
+            await MovieService().addToWatchlist(userId, movie, jwtToken);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Added ${movie['title'] ?? 'Movie'} to Watchlist!")),
+              );
+              _loadData(); // Refresh data to sync the UI
+            }
+          }
+        },
+      );
+    },
+  );
+}
 }
 
-class MovieCard extends StatelessWidget {
+// --- MOVIE CARD WIDGET (FIXED STACK) ---
+
+class MovieCard extends StatefulWidget {
   final dynamic movieData;
-  const MovieCard({super.key, this.movieData});
+  final bool isSaved;
+  final VoidCallback onIconTap;
+  final String userId;
+  final String jwtToken;
+
+  const MovieCard({
+    super.key,
+    required this.movieData,
+    required this.isSaved,
+    required this.onIconTap,
+    required this.userId,
+    required this.jwtToken,
+  });
+
+  @override
+  State<MovieCard> createState() => _MovieCardState();
+}
+
+class _MovieCardState extends State<MovieCard> {
+  late int localRating;
+
+  @override
+  void initState() {
+    super.initState();
+    localRating = widget.movieData['rating'] ?? 0;
+  }
+
+  @override
+  void didUpdateWidget(MovieCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.movieData['rating'] != oldWidget.movieData['rating']) {
+      setState(() {
+        localRating = widget.movieData['rating'] ?? 0;
+      });
+    }
+  }
+
+  void _updateRating(int newRating) {
+    setState(() {
+      // 3. Logic to "unclick": if clicking the same rating, set to 0
+      if (localRating == newRating) {
+        localRating = 0;
+      } else {
+        localRating = newRating;
+      }
+    });
+    
+    MovieService().rateMovie(
+      widget.userId, 
+      widget.movieData['id'], 
+      localRating, // Sends 0 if unclicked
+      widget.jwtToken
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 1. Safely get the Title
-    String title = movieData['title'] ?? movieData['Card'] ?? "Unknown Movie";
-    
-    // 2. Safely get the Poster
-    String? posterPath = movieData['poster_path'];
+    String title = widget.movieData['title'] ?? "Unknown Movie";
+    String? posterPath = widget.movieData['poster_path'];
     String imageUrl = "https://image.tmdb.org/t/p/w500$posterPath";
 
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFB2D3D2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))
+        ]
       ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
+      padding: const EdgeInsets.all(8),
+      child: Stack(
         children: [
-          Expanded(
-            child: posterPath != null && posterPath.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(imageUrl, fit: BoxFit.cover),
-                  )
-                : const Icon(Icons.movie, size: 50, color: Colors.white),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Center(
+                  child: posterPath != null && posterPath.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(imageUrl, fit: BoxFit.cover),
+                        )
+                      : const Icon(Icons.movie, size: 50, color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              
+              // 2. Only show stars if the movie is in the "Saved" list
+              if (widget.isSaved)
+                Row(
+                  children: List.generate(5, (index) {
+                    return GestureDetector(
+                      onTap: () => _updateRating(index + 1),
+                      child: Icon(
+                        index < localRating ? Icons.star : Icons.star_border,
+                        // 1. Stars turn yellow when active
+                        color: index < localRating ? Colors.yellow[700] : Colors.black87,
+                        size: 18,
+                      ),
+                    );
+                  }),
+                ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: widget.onIconTap,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                child: Icon(
+                  widget.isSaved ? Icons.delete : Icons.add,
+                  color: widget.isSaved ? Colors.red : Colors.green,
+                  size: 18,
+                ),
+              ),
+            ),
           ),
-          // Show the year if it exists
-          if (movieData['release_date'] != null && movieData['release_date'].toString().length >= 4)
-  Text(
-    movieData['release_date'].toString().substring(0, 4),
-    style: const TextStyle(fontSize: 10, color: Colors.black54),
-  )
-else if (movieData['release_date'] != null && movieData['release_date'].toString().isNotEmpty)
-  Text(
-    movieData['release_date'].toString(), // Just show whatever is there if it's short
-    style: const TextStyle(fontSize: 10, color: Colors.black54),
-  ),
         ],
       ),
     );

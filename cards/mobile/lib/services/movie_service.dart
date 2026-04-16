@@ -89,4 +89,109 @@ class MovieService {
       return {'error': 'Search failed: $e'};
     }
   }
+
+  // Inside MovieService class in movie_service.dart
+
+Future<Map<String, dynamic>> getWatchedMovies(String userId, String jwtToken) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/watched/get'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: jsonEncode({
+        'userId': int.parse(userId),
+        'jwtToken': jwtToken,
+      }),
+    );
+    return jsonDecode(response.body);
+  } catch (e) {
+    return {'error': e.toString()};
+  }
+}
+
+Future<Map<String, dynamic>> getSimilarMovies(List<dynamic> sourceMovies, String jwtToken) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/movies/similar-list'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: jsonEncode({'movies': sourceMovies}),
+    );
+    return jsonDecode(response.body);
+  } catch (e) {
+    return {'error': e.toString()};
+  }
+}
+
+// ADD TO movie_service.dart
+
+Future<Map<String, dynamic>> addToWatchlist(String userId, dynamic movie, String jwtToken) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/api/watchlist/add'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $jwtToken',
+    },
+    body: jsonEncode({
+      'userId': int.parse(userId),
+      'movie': movie,
+      'jwtToken': jwtToken,
+    }),
+  );
+  return jsonDecode(response.body);
+}
+
+Future<Map<String, dynamic>> deleteFromWatchlist(String userId, int movieId, String jwtToken) async {
+  try {
+    // Changed 'delete' to 'remove' to match your web app
+    final url = Uri.parse('$baseUrl/api/watchlist/remove'); 
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: jsonEncode({
+        'userId': int.parse(userId),
+        'movieId': movieId,
+        // Removed jwtToken from body since your web fetch doesn't use it there
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print("Server Error ${response.statusCode}: ${response.body}");
+      return {'error': 'Failed to remove movie'};
+    }
+  } catch (e) {
+    print("Delete Error: $e");
+    return {'error': e.toString()};
+  }
+}
+
+Future<Map<String, dynamic>> rateMovie(String userId, int movieId, int rating, String jwtToken) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/watchlist/rate'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: jsonEncode({
+        'userId': int.parse(userId),
+        'movieId': movieId,
+        'rating': rating,
+      }),
+    );
+    return jsonDecode(response.body);
+  } catch (e) {
+    return {'error': e.toString()};
+  }
+}
 }
