@@ -43,15 +43,26 @@ body {
   box-sizing: border-box;
 }
 
-h1, h2 {
+h1,
+h2 {
   font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);
 }
 
-h1 { font-size: 56px; margin: 32px 0; }
-h2 { font-size: 24px; margin: 0 0 8px; }
-p { margin: 0; }
+h1 {
+  font-size: 56px;
+  margin: 32px 0;
+}
+
+h2 {
+  font-size: 24px;
+  margin: 0 0 8px;
+}
+
+p {
+  margin: 0;
+}
 
 /* Existing Button Style (Used in Login/Cards) */
 .buttons {
@@ -63,6 +74,7 @@ p { margin: 0; }
   font-weight: bold;
   margin: 5px;
 }
+
 .buttons:hover {
   background-color: var(--fb-light);
 }
@@ -76,7 +88,8 @@ p { margin: 0; }
   width: 100%;
   padding: 2rem 3rem;
   box-sizing: border-box;
-  text-align: left; /* Overrides the center alignment from #root */
+  text-align: left;
+  /* Overrides the center alignment from #root */
 }
 
 /* Header */
@@ -87,6 +100,8 @@ p { margin: 0; }
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 1.5rem;
   margin-bottom: 2.5rem;
+  position: relative;
+  overflow: visible;
 }
 
 .dashboard-logo {
@@ -103,6 +118,7 @@ p { margin: 0; }
   flex: 1;
   max-width: 600px;
   margin: 0 2rem;
+  z-index: 60;
 }
 
 .search-input {
@@ -160,42 +176,74 @@ p { margin: 0; }
 /* Movie Grid */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-  gap: 2rem;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* Reduced from 300px to fit more columns */
+  gap: 1.5rem;
+  /* Slightly tighter gap */
+  width: 100%;
+  max-width: 1600px;
+  /* Increased from 1200px to utilize wide screens */
+  margin: 0 auto;
+  /* Centers the grid on massive ultra-wide monitors */
 }
 
 .movie-card {
   background-color: var(--fb-card);
-  border-radius: 24px;
-  padding: 1.25rem;
+  border-radius: 16px;
+  padding: 1rem;
+  /* Reduced padding to maximize image size */
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .movie-image-placeholder {
+  position: relative;
   background-color: var(--bg);
   width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 16px;
+  aspect-ratio: 2 / 3;
+  /* CHANGED: Standard vertical movie poster ratio */
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.movie-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .movie-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  /* Slightly smaller to fit narrower cards */
+  font-weight: 700;
   color: #000;
   margin: 0 0 0.25rem 0;
+  line-height: 1.2;
 }
 
 .movie-year {
   font-size: 0.9rem;
   color: #444;
   margin: 0 0 1rem 0;
+}
+
+.movie-director {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0 0 0.2rem 0;
+  font-style: italic;
+}
+
+.movie-genres {
+  font-size: 0.8rem;
+  color: #777;
+  margin: 0 0 0.75rem 0;
+  font-weight: 500;
 }
 
 .movie-rating {
@@ -205,18 +253,76 @@ p { margin: 0; }
 }
 
 /* Icons */
-.icon-search { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #666; }
-.icon-user { width: 36px; height: 36px; color: var(--fb-light); cursor: pointer; }
-.icon-bookmark { width: 18px; height: 18px; color: #000; }
-.icon-camera { width: 64px; height: 64px; color: #555; }
-.icon-star { width: 20px; height: 20px; color: #eab308; }
+.icon-search {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: #666;
+}
+
+.icon-user {
+  width: 36px;
+  height: 36px;
+  color: var(--fb-light);
+  cursor: pointer;
+}
+
+.icon-bookmark {
+  width: 18px;
+  height: 18px;
+  color: #000;
+}
+
+.icon-camera {
+  width: 64px;
+  height: 64px;
+  color: #555;
+}
+
+.icon-star {
+  width: 20px;
+  height: 20px;
+  color: #eab308;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #d32f2f;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+  background-color: #fff;
+}
+
+.icon-trash {
+  width: 16px;
+  height: 16px;
+}
 
 .film-auth-page {
   background-color: var(--fb-bg);
   min-height: 100vh;
   width: 100%;
   display: flex;
-  flex-direction: column; /* <-- ADD THIS LINE */
+  flex-direction: column;
+  /* <-- ADD THIS LINE */
   align-items: center;
   justify-content: center;
   padding: 2rem;
@@ -225,12 +331,15 @@ p { margin: 0; }
 
 /* Add this new block */
 .main-logo {
-  color: var(--fb-light); /* Uses your beige color so it pops against the teal */
+  color: var(--fb-light);
+  /* Uses your beige color so it pops against the teal */
   font-size: 3.5rem;
   font-weight: 700;
-  margin: 0 0 2rem 0; /* Adds space between the logo and the card */
+  margin: 0 0 2rem 0;
+  /* Adds space between the logo and the card */
   letter-spacing: 1px;
-  text-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Slight shadow to make it stand out */
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Slight shadow to make it stand out */
 }
 
 .auth-card {
@@ -338,11 +447,56 @@ p { margin: 0; }
 }
 
 .auth-msg {
-  color: #d32f2f; /* Error red */
+  color: #d32f2f;
+  /* Error red */
   font-size: 0.85rem;
   margin-top: 0.75rem;
   text-align: center;
   min-height: 20px;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background-color: var(--fb-light);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 50;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: #333;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: var(--fb-card);
+}
+
+.dropdown-poster {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 12px;
+  background-color: #ccc;
+}
+
+.dropdown-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
 /* Mobile Responsiveness for Auth Card */
@@ -350,13 +504,13 @@ p { margin: 0; }
   .auth-card {
     flex-direction: column;
   }
-  
+
   .auth-divider {
     width: auto;
     height: 1px;
     margin: 0 2rem;
   }
-  
+
   .auth-section {
     padding: 2rem;
   }
