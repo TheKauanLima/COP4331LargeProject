@@ -25,12 +25,6 @@ const SearchIcon = ({ onClick }: { onClick?: () => void }) => (
   </svg>
 );
 
-const UserIcon = ({ onClick }: { onClick?: () => void }) => (
-  <svg className="icon-user" fill="currentColor" viewBox="0 0 24 24" onClick={onClick}>
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z" />
-  </svg>
-);
-
 const BookmarkIcon = () => (
   <svg className="icon-bookmark" fill="currentColor" viewBox="0 0 20 20">
     <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
@@ -412,7 +406,7 @@ export default function DashboardPage() {
     <div className="film-dashboard">
       {/* Header */}
       <header className="dashboard-header">
-        <h1 className="dashboard-logo">FilmBuffs</h1>
+        <h1 className="dashboard-logo">FilmBuff</h1>
 
         <div className="search-wrapper">
           <input
@@ -468,10 +462,19 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="user-profile">
-          <UserIcon onClick={handleLogout} />
+        <div>
+          <button 
+            type="button" 
+            className="buttons" 
+            onClick={handleLogout}
+            style={{ margin: 0, backgroundColor: '#EEF5DB', color: '#000' }} // Overriding the background to match the search bar!
+          > 
+            Log Out 
+          </button>
         </div>
       </header>
+
+      <main>
 
       {/* Tabs */}
       <div className="tabs-wrapper">
@@ -507,6 +510,7 @@ export default function DashboardPage() {
               {activeTab === 'saved' && (
                 <button
                   className="delete-btn"
+                  aria-label="Remove Movie"
                   onClick={(e) => {
                     e.stopPropagation();
                     void handleRemoveFromWatchlist(movie.id);
@@ -542,6 +546,7 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+      </main>
     </div>
   );
 }

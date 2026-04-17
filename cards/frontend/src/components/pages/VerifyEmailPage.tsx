@@ -51,7 +51,7 @@ function VerifyEmailPage() {
     return (
         <div className="film-auth-page">
             
-            <h1 className="main-logo">FilmBuffs</h1>
+            <h1 className="main-logo">FilmBuff</h1>
 
             <div className="auth-card" style={{ maxWidth: '500px', textAlign: 'center' }}>
                 <div className="auth-section">

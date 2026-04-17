@@ -81,10 +81,10 @@ function ResetPasswordPage() {
     if (!token) {
         return (
             <div className="film-auth-page">
-                <h1 className="main-logo">FilmBuffs</h1>
+                <h1 className="main-logo">FilmBuff</h1>
 
                 <div className="auth-card" style={{ maxWidth: '450px', display: 'flex', justifyContent: 'center' }}>
-                    <div className="auth-section" style={{ flex: 'none', width: '100%' }}>
+                    <div className="auth-section" style={{ flex: 'none', width: '100%', padding: '2.5rem', boxSizing: 'border-box' }}>
                         <h2 className="auth-title">Invalid Reset Link</h2>
                         <p className="auth-subtitle">The password reset link is missing or invalid.</p>
 
@@ -115,10 +115,10 @@ function ResetPasswordPage() {
 
     return (
         <div className="film-auth-page">
-            <h1 className="main-logo">FilmBuffs</h1>
+            <h1 className="main-logo">FilmBuff</h1>
 
             <div className="auth-card" style={{ maxWidth: '450px', display: 'flex', justifyContent: 'center' }}>
-                <div className="auth-section" style={{ flex: 'none', width: '100%' }}>
+                <div className="auth-section" style={{ flex: 'none', width: '100%', padding: '2.5rem', boxSizing: 'border-box' }}>
                     <h2 className="auth-title">Reset Password</h2>
                     <p className="auth-subtitle">Enter your new password below.</p>
 

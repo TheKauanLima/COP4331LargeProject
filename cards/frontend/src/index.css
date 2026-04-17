@@ -228,20 +228,20 @@ p {
 
 .movie-year {
   font-size: 0.9rem;
-  color: #444;
+  color: #000;
   margin: 0 0 1rem 0;
 }
 
 .movie-director {
   font-size: 0.85rem;
-  color: #555;
+  color: #000;
   margin: 0 0 0.2rem 0;
   font-style: italic;
 }
 
 .movie-genres {
   font-size: 0.8rem;
-  color: #777;
+  color: #000;
   margin: 0 0 0.75rem 0;
   font-weight: 500;
 }
