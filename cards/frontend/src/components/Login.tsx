@@ -179,10 +179,10 @@ function Login() {
     };
 
     return (
-        <div className="film-auth-page">
+        <main className="film-auth-page">
             
             {/* NEW PLACEMENT: Title at the very top of the page */}
-            <h1 className="main-logo">FilmBuffs</h1>
+            <h1 className="main-logo">FilmBuff</h1>
 
             <div className="auth-card">
                 
@@ -237,7 +237,7 @@ function Login() {
                 </div>
 
             </div>
-        </div>
+        </main>
     );
 }
 

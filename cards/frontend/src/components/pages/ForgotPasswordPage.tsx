@@ -54,10 +54,10 @@ function ForgotPasswordPage() {
 
     return (
         <div className="film-auth-page">
-            <h1 className="main-logo">FilmBuffs</h1>
+            <h1 className="main-logo">FilmBuff</h1>
 
             <div className="auth-card" style={{ maxWidth: '450px', display: 'flex', justifyContent: 'center' }}>
-                <div className="auth-section" style={{ flex: 'none', width: '100%' }}>
+                <div className="auth-section" style={{ flex: 'none', width: '100%', padding: '2.5rem', boxSizing: 'border-box' }}>
                     <h2 className="auth-title">Forgot Password</h2>
                     <p className="auth-subtitle">Enter your email address and we'll send you a link to reset your password.</p>
 
