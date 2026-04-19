@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/movie_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -114,6 +115,25 @@ void _doLogin() async {
                   child: const Text(
                     "Don't have an account? Register here",
                     style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+
+                // Underneath your "Create Account" button container
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to the Forgot Password Page
+                   Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                    );
+                  },
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      color: Colors.white70, 
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ],

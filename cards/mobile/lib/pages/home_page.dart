@@ -218,7 +218,7 @@ class _MovieHomePageState extends State<MovieHomePage> {
             borderRadius: BorderRadius.circular(30),
           ),
           child: Center(
-            child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black,)),
           ),
         ),
       ),

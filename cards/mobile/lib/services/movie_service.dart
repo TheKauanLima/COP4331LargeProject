@@ -194,4 +194,27 @@ Future<Map<String, dynamic>> rateMovie(String userId, int movieId, int rating, S
     return {'error': e.toString()};
   }
 }
+
+Future<Map<String, dynamic>> sendPasswordReset(String email) async {
+  try {
+    // Check your backend route—usually it's /api/forgot-password or /api/reset-password
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/forgot-password'), 
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      // Log the error body to see if the server says "User not found"
+      print("Reset Error: ${response.body}");
+      return {'error': 'Failed to send reset link'};
+    }
+  } catch (e) {
+    return {'error': e.toString()};
+  }
+}
 }
