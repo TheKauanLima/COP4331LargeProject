@@ -42,6 +42,8 @@ class _MovieHomePageState extends State<MovieHomePage> {
   Future<void> _loadData() async {
     setState(() => isLoading = true);
     final data = await MovieService().getUserWatchlist(userId, jwtToken);
+
+    //print("DEBUG WATCHLIST ITEM: ${data['watchList'][0]}");
     
     if (mounted) {
       setState(() {
@@ -136,7 +138,7 @@ class _MovieHomePageState extends State<MovieHomePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text("FilmBuffs", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text("FilmBuff", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) => value == 'logout' ? _handleLogout(context) : null,
@@ -153,6 +155,7 @@ class _MovieHomePageState extends State<MovieHomePage> {
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 fillColor: Colors.white,
                 filled: true,
@@ -309,15 +312,15 @@ class _MovieCardState extends State<MovieCard> {
   @override
   void initState() {
     super.initState();
-    localRating = widget.movieData['rating'] ?? 0;
+    localRating = widget.movieData['userRating'] ?? 0;
   }
 
   @override
   void didUpdateWidget(MovieCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.movieData['rating'] != oldWidget.movieData['rating']) {
+    if (widget.movieData['userRating'] != oldWidget.movieData['userRating']) {
       setState(() {
-        localRating = widget.movieData['rating'] ?? 0;
+        localRating = widget.movieData['userRating'] ?? 0;
       });
     }
   }
@@ -375,7 +378,7 @@ class _MovieCardState extends State<MovieCard> {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black),
               ),
               
               // 2. Only show stars if the movie is in the "Saved" list

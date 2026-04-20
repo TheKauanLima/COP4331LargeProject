@@ -56,7 +56,7 @@ void _doLogin() async {
     return Scaffold(
       backgroundColor: const Color(0xFF435B5E), // Match your home page theme
       appBar: AppBar(
-        title: const Text("FilmBuffs Login", style: TextStyle(color: Colors.white)),
+        title: const Text("FilmBuff Login", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
