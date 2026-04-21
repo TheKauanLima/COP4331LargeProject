@@ -3,8 +3,7 @@ require('./setup');
 const request = require('supertest');
 const express = require('express');
 
-jest.mock('../utils/authUtils', () =>
-{
+jest.mock('../utils/authUtils', () => {
     const actual = jest.requireActual('../utils/authUtils');
     return {
         ...actual,
@@ -14,18 +13,31 @@ jest.mock('../utils/authUtils', () =>
 
 const createAuthRoutes = require('../routes/authRoutes');
 
-function createTestApp()
-{
+function createTestApp() {
     const app = express();
     app.use(express.json());
     app.use('/api', createAuthRoutes());
     return app;
 }
 
-describe('Auth API', () =>
-{
-    test('register success returns 200 with empty error', async () =>
-    {
+describe('Auth API', () => {
+    test('register failure returns 200 with error when required fields are missing', async () => {
+        const app = createTestApp();
+
+        const response = await request(app)
+            .post('/api/register')
+            .send({
+                firstName: 'Missing',
+                lastName: 'Fields',
+                login: 'missing_fields_01',
+                password: 'Password123!'
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.body.error).toBe('All fields are required.');
+    });
+
+    test('register success returns 200 with empty error', async () => {
         const app = createTestApp();
 
         const payload = {
@@ -45,8 +57,7 @@ describe('Auth API', () =>
         expect(response.body.message).toBe('Account created. Please check your email to verify your account.');
     });
 
-    test('login failure returns 200 with login/password incorrect error', async () =>
-    {
+    test('login failure returns 200 with login/password incorrect error', async () => {
         const app = createTestApp();
 
         await request(app)
@@ -70,8 +81,7 @@ describe('Auth API', () =>
         expect(response.body.error).toBe('Login/Password incorrect');
     });
 
-    test('register failure returns 200 with error on duplicate email', async () =>
-    {
+    test('register failure returns 200 with error on duplicate email', async () => {
         const app = createTestApp();
 
         await request(app)
@@ -98,8 +108,7 @@ describe('Auth API', () =>
         expect(response.body.error).toBe('Email already exists.');
     });
 
-    test('login failure returns 200 with verification required error if email is not verified', async () =>
-    {
+    test('login failure returns 200 with verification required error if email is not verified', async () => {
         const app = createTestApp();
 
         await request(app)
