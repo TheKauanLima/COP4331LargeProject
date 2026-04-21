@@ -142,7 +142,7 @@ module.exports = function createMovieRoutes() {
                 return b.popularity - a.popularity;
             });
 
-            const top10Results = results.slice(0, 10);
+            const top10Results = results.slice(0, 12);
 
             return res.json({
                 input_movies: movies,

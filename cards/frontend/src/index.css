@@ -105,10 +105,13 @@ p {
 }
 
 .dashboard-logo {
-  height: 300px; /* Adjust this number up or down to make the navbar logo bigger/smaller */
+  height: 300px;
+  /* Adjust this number up or down to make the navbar logo bigger/smaller */
   width: auto;
-  margin-top: -10rem;    /* Pulls the logo up closer to the top of the screen */
-  margin-bottom: -10rem; /* Pulls the login card up into the invisible bottom space */
+  margin-top: -10rem;
+  /* Pulls the logo up closer to the top of the screen */
+  margin-bottom: -10rem;
+  /* Pulls the login card up into the invisible bottom space */
   display: block;
 
   pointer-events: none;
@@ -136,9 +139,21 @@ p {
   box-sizing: border-box;
 }
 
+/* Main Content Area */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Tabs */
 .tabs-wrapper {
   margin-bottom: 2.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .tabs-container {
@@ -178,15 +193,14 @@ p {
 /* Movie Grid */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  /* Reduced from 300px to fit more columns */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
-  /* Slightly tighter gap */
   width: 100%;
-  max-width: 1600px;
-  /* Increased from 1200px to utilize wide screens */
+  max-width: 1400px;
   margin: 0 auto;
-  /* Centers the grid on massive ultra-wide monitors */
+  padding: 0 1rem;
+  box-sizing: border-box;
+  justify-items: center;
 }
 
 .movie-card {
@@ -197,6 +211,14 @@ p {
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 180px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 20px -2px rgba(0, 0, 0, 0.15);
 }
 
 .movie-image-placeholder {
@@ -232,6 +254,15 @@ p {
   font-size: 0.9rem;
   color: #000;
   margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.empty-state-message {
+  font-size: 1.1rem;
+  color: #fff;
+  text-align: center;
+  padding: 2rem;
+  margin: 2rem 0;
 }
 
 .movie-director {
@@ -290,7 +321,8 @@ p {
   color: #eab308;
 }
 
-.delete-btn, .add-btn {
+.delete-btn,
+.add-btn {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -308,7 +340,8 @@ p {
 }
 
 .delete-btn {
-  color: #ef4444; /* Red icon */
+  color: #ef4444;
+  /* Red icon */
 }
 
 .delete-btn:hover {
@@ -317,7 +350,8 @@ p {
 }
 
 .add-btn {
-  color: #4caf50; /* Green icon */
+  color: #4caf50;
+  /* Green icon */
 }
 
 .add-btn:hover {
@@ -345,10 +379,13 @@ p {
 
 /* Add this new block */
 .main-logo {
-  height: 500px; /* Adjust this number up or down to make the navbar logo bigger/smaller */
+  height: 500px;
+  /* Adjust this number up or down to make the navbar logo bigger/smaller */
   width: auto;
-  margin-top: -10rem;    /* Pulls the logo up closer to the top of the screen */
-  margin-bottom: -10rem; /* Pulls the login card up into the invisible bottom space */
+  margin-top: -10rem;
+  /* Pulls the logo up closer to the top of the screen */
+  margin-bottom: -10rem;
+  /* Pulls the login card up into the invisible bottom space */
   display: block;
   /* You can delete the old text-shadow and font-weight lines! */
   pointer-events: none;

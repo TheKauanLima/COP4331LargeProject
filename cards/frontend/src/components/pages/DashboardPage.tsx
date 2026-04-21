@@ -470,107 +470,107 @@ export default function DashboardPage() {
         </div>
 
         <div>
-          <button 
-            type="button" 
-            className="buttons" 
+          <button
+            type="button"
+            className="buttons"
             onClick={handleLogout}
             style={{ margin: 0, backgroundColor: '#EEF5DB', color: '#000' }} // Overriding the background to match the search bar!
-          > 
-            Log Out 
+          >
+            Log Out
           </button>
         </div>
       </header>
 
       <main>
 
-      {/* Tabs */}
-      <div className="tabs-wrapper">
-        <div className="tabs-container">
-          <button
-            className={`tab ${activeTab === 'saved' ? 'active-tab' : 'inactive-tab'}`}
-            onClick={() => setActiveTab('saved')}
-          >
-            <BookmarkIcon />
-            My Saved Movies
-          </button>
-          <button
-            className={`tab ${activeTab === 'recommended' ? 'active-tab' : 'inactive-tab'}`}
-            onClick={() => {
-              setActiveTab('recommended');
-              void fetchRecommendations();
-            }}
-          >
-            Recommended For You
-          </button>
-        </div>
-      </div>
-
-      {/* Movie Grid */}
-      <div className="movie-grid">
-        {isLoading && displayMovies.length === 0 && <p className="movie-year">Loading movies...</p>}
-
-        {!isLoading && displayMovies.length === 0 && <p className="movie-year">{emptyMessage}</p>}
-
-        {displayMovies.map((movie) => (
-          <div key={movie.id} className="movie-card">
-            <div className="movie-image-placeholder" style={{ position: 'relative' }}>
-              
-              {/* TRASH ICON: Only shows on 'saved' tab */}
-              {activeTab === 'saved' && (
-                <button
-                  className="delete-btn"
-                  aria-label="Remove Movie"
-                  style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void handleRemoveFromWatchlist(movie.id);
-                  }}
-                >
-                  <TrashIcon />
-                </button>
-              )}
-
-              {/* PLUS ICON: Only shows on 'recommended' tab */}
-              {activeTab === 'recommended' && (
-                <button
-                  className="add-btn"
-                  aria-label="Add Movie"
-                  style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void handleMovieSelect(movie); // Reuses your existing add function!
-                  }}
-                >
-                  <PlusIcon />
-                </button>
-              )}
-
-              {movie.poster_path ? (
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                  alt={movie.title}
-                  className="movie-poster"
-                />
-              ) : (
-                <CameraIcon />
-              )}
-            </div>
-            <h2 className="movie-title">{movie.title}</h2>
-            <p className="movie-director">{movie.director ? `Dir: ${movie.director}` : ''}</p>
-            <p className="movie-genres">{movie.genres && movie.genres.length > 0 ? movie.genres.join(', ') : ''}</p>
-            <p className="movie-year">{movie.release_date || 'Unknown release date'}</p>
-            <div className="movie-rating">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <StarIcon
-                  key={`${movie.id}-star-${index}`}
-                  isFilled={index < (movie.userRating || 0)}
-                  onClick={() => void handleRateMovie(movie.id, index + 1)}
-                />
-              ))}
-            </div>
+        {/* Tabs */}
+        <div className="tabs-wrapper">
+          <div className="tabs-container">
+            <button
+              className={`tab ${activeTab === 'saved' ? 'active-tab' : 'inactive-tab'}`}
+              onClick={() => setActiveTab('saved')}
+            >
+              <BookmarkIcon />
+              My Saved Movies
+            </button>
+            <button
+              className={`tab ${activeTab === 'recommended' ? 'active-tab' : 'inactive-tab'}`}
+              onClick={() => {
+                setActiveTab('recommended');
+                void fetchRecommendations();
+              }}
+            >
+              Recommended For You
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+
+        {/* Movie Grid */}
+        <div className="movie-grid">
+          {isLoading && displayMovies.length === 0 && <p style={{ gridColumn: '1 / -1', color: '#fff', fontSize: '1.1rem' }}>Loading movies...</p>}
+
+          {!isLoading && displayMovies.length === 0 && <p style={{ gridColumn: '1 / -1', color: '#fff', fontSize: '1.1rem' }}>{emptyMessage}</p>}
+
+          {displayMovies.map((movie) => (
+            <div key={movie.id} className="movie-card">
+              <div className="movie-image-placeholder" style={{ position: 'relative' }}>
+
+                {/* TRASH ICON: Only shows on 'saved' tab */}
+                {activeTab === 'saved' && (
+                  <button
+                    className="delete-btn"
+                    aria-label="Remove Movie"
+                    style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void handleRemoveFromWatchlist(movie.id);
+                    }}
+                  >
+                    <TrashIcon />
+                  </button>
+                )}
+
+                {/* PLUS ICON: Only shows on 'recommended' tab */}
+                {activeTab === 'recommended' && (
+                  <button
+                    className="add-btn"
+                    aria-label="Add Movie"
+                    style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void handleMovieSelect(movie); // Reuses your existing add function!
+                    }}
+                  >
+                    <PlusIcon />
+                  </button>
+                )}
+
+                {movie.poster_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    alt={movie.title}
+                    className="movie-poster"
+                  />
+                ) : (
+                  <CameraIcon />
+                )}
+              </div>
+              <h2 className="movie-title">{movie.title}</h2>
+              <p className="movie-director">{movie.director ? `Dir: ${movie.director}` : ''}</p>
+              <p className="movie-genres">{movie.genres && movie.genres.length > 0 ? movie.genres.join(', ') : ''}</p>
+              <p className="movie-year">{movie.release_date || 'Unknown release date'}</p>
+              <div className="movie-rating">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <StarIcon
+                    key={`${movie.id}-star-${index}`}
+                    isFilled={index < (movie.userRating || 0)}
+                    onClick={() => void handleRateMovie(movie.id, index + 1)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );

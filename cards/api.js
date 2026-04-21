@@ -15,55 +15,44 @@ const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replac
 const resendClient = emailService === 'resend' && resendApiKey ? new Resend(resendApiKey) : null;
 const passwordSaltRounds = Number(process.env.PASSWORD_SALT_ROUNDS || 12);
 
-function isBcryptHash(value)
-{
+function isBcryptHash(value) {
     return typeof value === 'string' && value.startsWith('$2');
 }
 
-async function hashPassword(plainPassword)
-{
+async function hashPassword(plainPassword) {
     return bcrypt.hash(plainPassword, passwordSaltRounds);
 }
 
-async function verifyPassword(plainPassword, storedPassword)
-{
-    if (!storedPassword)
-    {
+async function verifyPassword(plainPassword, storedPassword) {
+    if (!storedPassword) {
         return false;
     }
 
-    if (isBcryptHash(storedPassword))
-    {
+    if (isBcryptHash(storedPassword)) {
         return bcrypt.compare(plainPassword, storedPassword);
     }
 
     return storedPassword === plainPassword;
 }
 
-function createVerificationToken()
-{
+function createVerificationToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
-function hashVerificationToken(token)
-{
+function hashVerificationToken(token) {
     return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-async function sendVerificationEmail(email, token)
-{
-    if (emailService !== 'resend')
-    {
+async function sendVerificationEmail(email, token) {
+    if (emailService !== 'resend') {
         throw new Error('EMAIL_SERVICE must be set to resend.');
     }
 
-    if (!resendClient)
-    {
+    if (!resendClient) {
         throw new Error('RESEND_API_KEY is not configured.');
     }
 
-    if (!verificationSender)
-    {
+    if (!verificationSender) {
         throw new Error('EMAIL_FROM_NAME and EMAIL_FROM_ADDRESS must be configured.');
     }
 
@@ -82,155 +71,135 @@ async function sendVerificationEmail(email, token)
     });
 }
 
-exports.setApp = function(app, client, cardList)
-{
-    app.post('/api/addcard', async (req, res, next) =>
-    {
+exports.setApp = function (app, client, cardList) {
+    app.post('/api/addcard', async (req, res, next) => {
         // incoming: userId, color
         // outgoing: error
         const { userId, card, jwtToken } = req.body;
-        try
-        {
-            if(token.isExpired(jwtToken))
-            {
-                var r = {error:'The JWT is no longer valid', jwtToken: ''};
+        try {
+            if (token.isExpired(jwtToken)) {
+                var r = { error: 'The JWT is no longer valid', jwtToken: '' };
                 res.status(200).json(r);
                 return;
             }
         }
-        catch(e)
-        {
+        catch (e) {
             console.log(e.message);
         }
 
-        const newCard = {Card:card,UserId:userId};
+        const newCard = { Card: card, UserId: userId };
         var error = '';
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const result = db.collection('Cards').insertOne(newCard);
         }
-        catch(e)
-        {
+        catch (e) {
             error = e.toString();
         }
 
         var refreshedToken = null;
-        try
-        {
+        try {
             refreshedToken = token.refresh(jwtToken);
         }
-        catch(e)
-        {
+        catch (e) {
             console.log(e.message);
         }
-        
+
         var ret = { error: error, jwtToken: refreshedToken };
         res.status(200).json(ret);
     });
 
-    app.post('/api/seed', async (req, res, next) =>
-    {
+    app.post('/api/seed', async (req, res, next) => {
         // Seed the database with initial card list
         var error = '';
         var count = 0;
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const cardsCollection = db.collection('Cards');
-            
+
             // Clear existing cards
             await cardsCollection.deleteMany({});
-            
+
             // Insert all cards from cardList
             const cardsData = cardList.map(card => ({ Card: card }));
             const result = await cardsCollection.insertMany(cardsData);
             count = result.insertedCount;
         }
-        catch(e)
-        {
+        catch (e) {
             error = e.toString();
         }
 
         res.status(200).json({ error: error, count: count });
     });
 
-    app.post('/api/searchcards', async (req, res, next) =>
-    {
+    app.post('/api/searchcards', async (req, res, next) => {
         // incoming: userId, search
         // outgoing: results[], error
         var error = '';
 
         const { userId, search, jwtToken } = req.body;
-        try
-        {
-            if( token.isExpired(jwtToken))
-            {
-                var r = {error:'The JWT is no longer valid', jwtToken: ''};
+        try {
+            if (token.isExpired(jwtToken)) {
+                var r = { error: 'The JWT is no longer valid', jwtToken: '' };
                 res.status(200).json(r);
                 return;
             }
         }
-        catch(e)
-        {
+        catch (e) {
             console.log(e.message);
         }
 
         var _search = search.trim();
         const db = client.db('COP4331Cards');
-        const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*',
-        $options:'i'}}).toArray();
+        const results = await db.collection('Cards').find({
+            "Card": {
+                $regex: _search + '.*',
+                $options: 'i'
+            }
+        }).toArray();
 
         var _ret = [];
-        for( var i=0; i<results.length; i++ )
-        {
-            _ret.push( results[i].Card );
+        for (var i = 0; i < results.length; i++) {
+            _ret.push(results[i].Card);
         }
 
         var refreshedToken = null;
-        try
-        {
+        try {
             refreshedToken = token.refresh(jwtToken);
         }
-        catch(e)
-        {
+        catch (e) {
             console.log(e.message);
         }
 
-        var ret = { results:_ret, error: error, jwtToken: refreshedToken };
+        var ret = { results: _ret, error: error, jwtToken: refreshedToken };
         res.status(200).json(ret);
     });
 
-/// User APIs ///
+    /// User APIs ///
 
-    app.post('/api/register', async (req, res, next) =>
-    {
+    app.post('/api/register', async (req, res, next) => {
         // incoming: firstName, lastName, login, password, email
         // outgoing: error
         var error = '';
         const { firstName, lastName, login, password, email } = req.body;
 
-        if (!firstName || !lastName || !login || !password || !email)
-        {
+        if (!firstName || !lastName || !login || !password || !email) {
             res.status(200).json({ error: 'All fields are required.' });
             return;
         }
 
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const users = db.collection('Users');
             const existingUser = await users.findOne({ Login: login });
             const existingEmail = await users.findOne({ Email: email });
 
-            if (existingUser)
-            {
+            if (existingUser) {
                 res.status(200).json({ error: 'Username already exists.' });
                 return;
             }
 
-            if (existingEmail)
-            {
+            if (existingEmail) {
                 res.status(200).json({ error: 'Email already exists.' });
                 return;
             }
@@ -259,13 +228,11 @@ exports.setApp = function(app, client, cardList)
 
             await sendVerificationEmail(email, verificationToken);
         }
-        catch(e)
-        {
+        catch (e) {
             error = e.toString();
         }
 
-        if (error)
-        {
+        if (error) {
             res.status(200).json({ error: error });
             return;
         }
@@ -273,8 +240,7 @@ exports.setApp = function(app, client, cardList)
         res.status(200).json({ error: '', message: 'Account created. Please check your email to verify your account.' });
     });
 
-    app.post('/api/login', async (req, res, next) =>
-    {
+    app.post('/api/login', async (req, res, next) => {
         // incoming: login, password
         // outgoing: id, firstName, lastName, error
         const { login, password } = req.body;
@@ -284,18 +250,15 @@ exports.setApp = function(app, client, cardList)
         const user = await users.findOne({ Login: login });
         var ret;
 
-        if( user )
-        {
+        if (user) {
             const matchesPassword = await verifyPassword(password, user.Password);
-            if (!matchesPassword)
-            {
-                ret = {error:'Login/Password incorrect'};
+            if (!matchesPassword) {
+                ret = { error: 'Login/Password incorrect' };
                 res.status(200).json(ret);
                 return;
             }
 
-            if (!isBcryptHash(user.Password))
-            {
+            if (!isBcryptHash(user.Password)) {
                 const upgradedHash = await hashPassword(password);
                 await users.updateOne(
                     { _id: user._id },
@@ -303,8 +266,7 @@ exports.setApp = function(app, client, cardList)
                 );
             }
 
-            if (user.IsEmailVerified === false)
-            {
+            if (user.IsEmailVerified === false) {
                 ret = {
                     error: 'Please verify your email before logging in.',
                     verificationRequired: true,
@@ -318,39 +280,33 @@ exports.setApp = function(app, client, cardList)
             var fn = user.FirstName;
             var ln = user.LastName;
 
-            try
-            {
+            try {
                 const token = require("./createJWT.js");
-                ret = token.createToken( fn, ln, id );
+                ret = token.createToken(fn, ln, id);
             }
-            catch(e)
-            {
-                ret = {error:e.message};
+            catch (e) {
+                ret = { error: e.message };
             }
         }
-        else
-        {
-            ret = {error:"Login/Password incorrect"};
+        else {
+            ret = { error: "Login/Password incorrect" };
         }
 
         //var ret = { id:id, firstName:fn, lastName:ln, error:''};
         res.status(200).json(ret);
     });
 
-    app.post('/api/verify-email', async (req, res, next) =>
-    {
+    app.post('/api/verify-email', async (req, res, next) => {
         // incoming: token
         // outgoing: error, message
         const { token } = req.body;
 
-        if (!token)
-        {
+        if (!token) {
             res.status(200).json({ error: 'Verification token is required.' });
             return;
         }
 
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const users = db.collection('Users');
             const tokenHash = hashVerificationToken(token);
@@ -366,34 +322,29 @@ exports.setApp = function(app, client, cardList)
                 }
             );
 
-            if (result.matchedCount === 0)
-            {
+            if (result.matchedCount === 0) {
                 res.status(200).json({ error: 'Invalid or expired verification token.' });
                 return;
             }
 
             res.status(200).json({ error: '', message: 'Email verified successfully. You can now log in.' });
         }
-        catch (e)
-        {
+        catch (e) {
             res.status(200).json({ error: e.toString() });
         }
     });
 
-    app.post('/api/resend-verification', async (req, res, next) =>
-    {
+    app.post('/api/resend-verification', async (req, res, next) => {
         // incoming: loginOrEmail
         // outgoing: error, message
         const { loginOrEmail } = req.body;
 
-        if (!loginOrEmail)
-        {
+        if (!loginOrEmail) {
             res.status(200).json({ error: 'Username or email is required.' });
             return;
         }
 
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const users = db.collection('Users');
 
@@ -404,20 +355,17 @@ exports.setApp = function(app, client, cardList)
                 ]
             });
 
-            if (!user)
-            {
+            if (!user) {
                 res.status(200).json({ error: 'User not found.' });
                 return;
             }
 
-            if (user.IsEmailVerified !== false)
-            {
+            if (user.IsEmailVerified !== false) {
                 res.status(200).json({ error: 'Email is already verified.' });
                 return;
             }
 
-            if (!user.Email)
-            {
+            if (!user.Email) {
                 res.status(200).json({ error: 'No email found for this account.' });
                 return;
             }
@@ -440,27 +388,23 @@ exports.setApp = function(app, client, cardList)
 
             res.status(200).json({ error: '', message: 'Verification email sent.' });
         }
-        catch (e)
-        {
+        catch (e) {
             res.status(200).json({ error: e.toString() });
         }
     });
 
-    app.post('/api/getuser', async (req, res, next) =>
-    {
+    app.post('/api/getuser', async (req, res, next) => {
         // incoming: userId
         // outgoing: user, error
         var error = '';
         const { userId } = req.body;
 
-        if (!userId)
-        {
+        if (!userId) {
             res.status(200).json({ error: 'UserID is required.' });
             return;
         }
 
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const user = await db.collection('Users').findOne(
                 { UserID: userId },
@@ -474,125 +418,109 @@ exports.setApp = function(app, client, cardList)
                 }
             );
 
-            if (!user)
-            {
+            if (!user) {
                 res.status(200).json({ error: 'User not found.' });
                 return;
             }
 
-            if (!user.watchList)
-            {
+            if (!user.watchList) {
                 user.watchList = [];
             }
 
-            if (!user.watchedMovies)
-            {
+            if (!user.watchedMovies) {
                 user.watchedMovies = [];
             }
 
             res.status(200).json({ user: user, error: '' });
         }
-        catch (e)
-        {
+        catch (e) {
             error = e.toString();
             res.status(200).json({ error: error });
         }
     });
-    app.post('/api/edituser', async (req, res, next) =>
-    {
-    // incoming: userId, firstName, lastName, login, password
-    // outgoing: error
-    var error = '';
-    const { userId, firstName, lastName, login, password } = req.body;
+    app.post('/api/edituser', async (req, res, next) => {
+        // incoming: userId, firstName, lastName, login, password
+        // outgoing: error
+        var error = '';
+        const { userId, firstName, lastName, login, password } = req.body;
 
-    if (!userId || !firstName || !lastName || !login || !password)
-    {
-        res.status(200).json({ error: 'All fields are required.' });
-        return;
-    }
-
-    try
-    {
-        const db = client.db('COP4331Cards');
-        const users = db.collection('Users');
-        const hashedPassword = await hashPassword(password);
-
-        const existingUser = await users.findOne({
-        Login: login,
-        UserID: { $ne: userId }
-        });
-
-        if (existingUser)
-        {
-        res.status(200).json({ error: 'Username already exists.' });
-        return;
+        if (!userId || !firstName || !lastName || !login || !password) {
+            res.status(200).json({ error: 'All fields are required.' });
+            return;
         }
 
-        const result = await users.updateOne(
-        { UserID: userId },
-        {
-            $set: {
-            FirstName: firstName,
-            LastName: lastName,
-            Login: login,
-            Password: hashedPassword
+        try {
+            const db = client.db('COP4331Cards');
+            const users = db.collection('Users');
+            const hashedPassword = await hashPassword(password);
+
+            const existingUser = await users.findOne({
+                Login: login,
+                UserID: { $ne: userId }
+            });
+
+            if (existingUser) {
+                res.status(200).json({ error: 'Username already exists.' });
+                return;
             }
-        }
-        );
 
-        if (result.matchedCount === 0)
-        {
-        res.status(200).json({ error: 'User not found.' });
-        return;
-        }
+            const result = await users.updateOne(
+                { UserID: userId },
+                {
+                    $set: {
+                        FirstName: firstName,
+                        LastName: lastName,
+                        Login: login,
+                        Password: hashedPassword
+                    }
+                }
+            );
 
-        res.status(200).json({ error: '' });
-    }
-    catch (e)
-    {
-        error = e.toString();
-        res.status(200).json({ error: error });
-    }
+            if (result.matchedCount === 0) {
+                res.status(200).json({ error: 'User not found.' });
+                return;
+            }
+
+            res.status(200).json({ error: '' });
+        }
+        catch (e) {
+            error = e.toString();
+            res.status(200).json({ error: error });
+        }
     });
 
-    app.post('/api/deleteuser', async (req, res, next) =>
-    {
-    // incoming: userId
-    // outgoing: error
-    var error = '';
-    const { userId } = req.body;
+    app.post('/api/deleteuser', async (req, res, next) => {
+        // incoming: userId
+        // outgoing: error
+        var error = '';
+        const { userId } = req.body;
 
-    if (!userId)
-    {
-        res.status(200).json({ error: 'UserID is required.' });
-        return;
-    }
-
-    try
-    {
-        const db = client.db('COP4331Cards');
-        const result = await db.collection('Users').deleteOne({ UserID: userId });
-
-        if (result.deletedCount === 0)
-        {
-        res.status(200).json({ error: 'User not found.' });
-        return;
+        if (!userId) {
+            res.status(200).json({ error: 'UserID is required.' });
+            return;
         }
 
-        res.status(200).json({ error: '' });
-    }
-    catch (e)
-    {
-        error = e.toString();
-        res.status(200).json({ error: error });
-    }
+        try {
+            const db = client.db('COP4331Cards');
+            const result = await db.collection('Users').deleteOne({ UserID: userId });
+
+            if (result.deletedCount === 0) {
+                res.status(200).json({ error: 'User not found.' });
+                return;
+            }
+
+            res.status(200).json({ error: '' });
+        }
+        catch (e) {
+            error = e.toString();
+            res.status(200).json({ error: error });
+        }
     });
 
 
-    
 
-    async function fetchSimilarMovies(movieId)
-    {
+
+    async function fetchSimilarMovies(movieId) {
         const url = `https://api.themoviedb.org/3/movie/${movieId}/similar`;
 
         const response = await fetch(url, {
@@ -605,22 +533,18 @@ exports.setApp = function(app, client, cardList)
 
         const data = await response.json();
 
-        if (!response.ok)
-        {
+        if (!response.ok) {
             throw new Error(`TMDB error for movie ${movieId}: ${JSON.stringify(data)}`);
         }
 
         return data.results || [];
     }
 
-    app.get("/api/movies/search", async (req, res) =>
-    {
-        try
-        {
+    app.get("/api/movies/search", async (req, res) => {
+        try {
             const query = req.query.q;
 
-            if (!query)
-            {
+            if (!query) {
                 return res.status(400).json({ error: "Missing q parameter" });
             }
 
@@ -642,17 +566,14 @@ exports.setApp = function(app, client, cardList)
             console.log("TMDB raw body:", text);
 
             let data;
-            try
-            {
+            try {
                 data = JSON.parse(text);
             }
-            catch
-            {
+            catch {
                 data = { raw: text };
             }
 
-            if (!response.ok)
-            {
+            if (!response.ok) {
                 return res.status(response.status).json({
                     error: "TMDB request failed",
                     details: data
@@ -661,8 +582,7 @@ exports.setApp = function(app, client, cardList)
 
             return res.json(data);
         }
-        catch (error)
-        {
+        catch (error) {
             console.error("FULL FETCH ERROR:", error);
             console.error("CAUSE:", error.cause);
 
@@ -674,16 +594,13 @@ exports.setApp = function(app, client, cardList)
         }
     });
 
-    app.post("/api/movies/similar-list", async (req, res) =>
-    {
-        try
-        {
+    app.post("/api/movies/similar-list", async (req, res) => {
+        try {
             console.log("BODY:", req.body);
 
             const { movies } = req.body || {};
 
-            if (!Array.isArray(movies) || movies.length === 0)
-            {
+            if (!Array.isArray(movies) || movies.length === 0) {
                 return res.status(400).json({
                     error: "Request body must include a non-empty movies array"
                 });
@@ -693,8 +610,7 @@ exports.setApp = function(app, client, cardList)
                 .map((movie) => movie.id)
                 .filter((id) => Number.isInteger(id));
 
-            if (movieIds.length === 0)
-            {
+            if (movieIds.length === 0) {
                 return res.status(400).json({
                     error: "Each movie must include an integer id"
                 });
@@ -707,17 +623,13 @@ exports.setApp = function(app, client, cardList)
             const inputIds = new Set(movieIds);
             const combinedMap = new Map();
 
-            for (const similarMovies of similarLists)
-            {
-                for (const movie of similarMovies)
-                {
-                    if (inputIds.has(movie.id))
-                    {
+            for (const similarMovies of similarLists) {
+                for (const movie of similarMovies) {
+                    if (inputIds.has(movie.id)) {
                         continue;
                     }
 
-                    if (!combinedMap.has(movie.id))
-                    {
+                    if (!combinedMap.has(movie.id)) {
                         combinedMap.set(movie.id, {
                             id: movie.id,
                             title: movie.title,
@@ -734,30 +646,28 @@ exports.setApp = function(app, client, cardList)
                             matched_count: 1
                         });
                     }
-                    else
-                    {
+                    else {
                         combinedMap.get(movie.id).matched_count += 1;
                     }
                 }
             }
 
-            const results = Array.from(combinedMap.values()).sort((a, b) =>
-            {
-                if (b.matched_count !== a.matched_count)
-                {
+            const results = Array.from(combinedMap.values()).sort((a, b) => {
+                if (b.matched_count !== a.matched_count) {
                     return b.matched_count - a.matched_count;
                 }
                 return b.popularity - a.popularity;
             });
 
+            const top12Results = results.slice(0, 12);
+
             return res.json({
                 input_movies: movies,
-                count: results.length,
-                results
+                count: top12Results.length,
+                results: top12Results
             });
         }
-        catch (error)
-        {
+        catch (error) {
             console.error("SIMILAR LIST ERROR:", error);
 
             return res.status(500).json({
@@ -768,14 +678,11 @@ exports.setApp = function(app, client, cardList)
     });
 
 
-    app.post('/api/watchlist/add', async (req, res) =>
-    {
-        try
-        {
+    app.post('/api/watchlist/add', async (req, res) => {
+        try {
             const { userId, movie } = req.body;
 
-            if (!userId || !movie || !movie.id || !movie.title)
-            {
+            if (!userId || !movie || !movie.id || !movie.title) {
                 return res.status(400).json({ error: 'Missing userId or movie data.' });
             }
 
@@ -794,27 +701,22 @@ exports.setApp = function(app, client, cardList)
                 { $push: { watchList: movieToAdd } }
             );
 
-            if (result.matchedCount === 0)
-            {
+            if (result.matchedCount === 0) {
                 return res.status(200).json({ error: 'User not found or movie already in watchList.' });
             }
 
             return res.status(200).json({ error: '', message: 'Movie added to watchList.' });
         }
-        catch (e)
-        {
+        catch (e) {
             return res.status(500).json({ error: e.toString() });
         }
     });
 
-    app.post('/api/watched/add', async (req, res) =>
-    {
-        try
-        {
+    app.post('/api/watched/add', async (req, res) => {
+        try {
             const { userId, movie } = req.body;
 
-            if (!userId || !movie || !movie.id || !movie.title)
-            {
+            if (!userId || !movie || !movie.id || !movie.title) {
                 return res.status(400).json({ error: 'Missing userId or movie data.' });
             }
 
@@ -833,41 +735,35 @@ exports.setApp = function(app, client, cardList)
                 { $push: { watchedMovies: movieToAdd } }
             );
 
-            if (result.matchedCount === 0)
-            {
+            if (result.matchedCount === 0) {
                 return res.status(200).json({ error: 'User not found or movie already in watchedMovies.' });
             }
 
             return res.status(200).json({ error: '', message: 'Movie added to watchedMovies.' });
         }
-        catch (e)
-        {
+        catch (e) {
             return res.status(500).json({ error: e.toString() });
         }
     });
 
 
-    app.post('/api/watchlist/get', async (req, res) =>
-    {
+    app.post('/api/watchlist/get', async (req, res) => {
         var error = '';
         const { userId } = req.body;
 
-        if (!userId)
-        {
+        if (!userId) {
             res.status(200).json({ error: 'UserID is required.' });
             return;
         }
 
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const user = await db.collection('Users').findOne(
                 { UserID: userId },
                 { projection: { _id: 0, watchList: 1 } }
             );
 
-            if (!user)
-            {
+            if (!user) {
                 res.status(200).json({ error: 'User not found.' });
                 return;
             }
@@ -877,34 +773,29 @@ exports.setApp = function(app, client, cardList)
                 watchList: user.watchList || []
             });
         }
-        catch (e)
-        {
+        catch (e) {
             error = e.toString();
             res.status(200).json({ error: error });
         }
     });
 
-    app.post('/api/watched/get', async (req, res) =>
-    {
+    app.post('/api/watched/get', async (req, res) => {
         var error = '';
         const { userId } = req.body;
 
-        if (!userId)
-        {
+        if (!userId) {
             res.status(200).json({ error: 'UserID is required.' });
             return;
         }
 
-        try
-        {
+        try {
             const db = client.db('COP4331Cards');
             const user = await db.collection('Users').findOne(
                 { UserID: userId },
                 { projection: { _id: 0, watchedMovies: 1 } }
             );
 
-            if (!user)
-            {
+            if (!user) {
                 res.status(200).json({ error: 'User not found.' });
                 return;
             }
@@ -914,8 +805,7 @@ exports.setApp = function(app, client, cardList)
                 watchedMovies: user.watchedMovies || []
             });
         }
-        catch (e)
-        {
+        catch (e) {
             error = e.toString();
             res.status(200).json({ error: error });
         }
