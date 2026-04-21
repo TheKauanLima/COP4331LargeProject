@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { buildPath } from '../Path';
 import { retrieveToken } from '../../tokenStorage';
+import fbLogo from '../../assets/Logo.png';
 
 interface Movie {
   id: number;
@@ -28,6 +29,12 @@ const SearchIcon = ({ onClick }: { onClick?: () => void }) => (
 const BookmarkIcon = () => (
   <svg className="icon-bookmark" fill="currentColor" viewBox="0 0 20 20">
     <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
   </svg>
 );
 
@@ -406,7 +413,7 @@ export default function DashboardPage() {
     <div className="film-dashboard">
       {/* Header */}
       <header className="dashboard-header">
-        <h1 className="dashboard-logo">FilmBuff</h1>
+        <img src={fbLogo} alt="FilmBuffs Logo" className="dashboard-logo" />
 
         <div className="search-wrapper">
           <input
@@ -506,17 +513,35 @@ export default function DashboardPage() {
 
         {displayMovies.map((movie) => (
           <div key={movie.id} className="movie-card">
-            <div className="movie-image-placeholder">
+            <div className="movie-image-placeholder" style={{ position: 'relative' }}>
+              
+              {/* TRASH ICON: Only shows on 'saved' tab */}
               {activeTab === 'saved' && (
                 <button
                   className="delete-btn"
                   aria-label="Remove Movie"
+                  style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     void handleRemoveFromWatchlist(movie.id);
                   }}
                 >
                   <TrashIcon />
+                </button>
+              )}
+
+              {/* PLUS ICON: Only shows on 'recommended' tab */}
+              {activeTab === 'recommended' && (
+                <button
+                  className="add-btn"
+                  aria-label="Add Movie"
+                  style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleMovieSelect(movie); // Reuses your existing add function!
+                  }}
+                >
+                  <PlusIcon />
                 </button>
               )}
 

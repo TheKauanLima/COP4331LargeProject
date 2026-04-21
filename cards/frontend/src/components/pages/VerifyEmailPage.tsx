@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { buildPath } from '../Path';
+import fbLogo from '../../assets/Logo.png';
 
 function VerifyEmailPage() {
     const [searchParams] = useSearchParams();
@@ -51,7 +52,7 @@ function VerifyEmailPage() {
     return (
         <div className="film-auth-page">
             
-            <h1 className="main-logo">FilmBuff</h1>
+            <img src={fbLogo} alt="FilmBuffs Logo" className="main-logo" />
 
             <div className="auth-card" style={{ maxWidth: '500px', textAlign: 'center' }}>
                 <div className="auth-section">

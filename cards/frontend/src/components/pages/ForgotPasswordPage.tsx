@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type MouseEvent } from 'react';
 import { buildPath } from '../Path';
 import { Link } from 'react-router-dom';
+import fbLogo from '../../assets/Logo.png';
 
 function ForgotPasswordPage() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -54,7 +55,7 @@ function ForgotPasswordPage() {
 
     return (
         <div className="film-auth-page">
-            <h1 className="main-logo">FilmBuff</h1>
+            <img src={fbLogo} alt="FilmBuffs Logo" className="main-logo" />
 
             <div className="auth-card" style={{ maxWidth: '450px', display: 'flex', justifyContent: 'center' }}>
                 <div className="auth-section" style={{ flex: 'none', width: '100%', padding: '2.5rem', boxSizing: 'border-box' }}>
