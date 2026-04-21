@@ -48,32 +48,46 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF435B5E), // Main app background
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    // Extends gradient behind the back button
+    extendBodyBehindAppBar: true, 
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () => Navigator.pop(context),
+      ),
+    ),
+    body: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromARGB(255, 90, 121, 125), // Your custom light teal
+            Color(0xFF1A2627),                 // Your deep charcoal
+          ],
         ),
       ),
-      body: Center(
+      child: Center(
         child: SingleChildScrollView(
           child: Container(
             width: 350,
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: const Color(0xFFB2D3D2), // Card background
+              color: const Color(0xFFB2D3D2), // Keep your Card background
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: Colors.black.withOpacity(0.3), // Slightly deeper shadow
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 )
               ],
             ),
@@ -101,11 +115,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     hintText: 'Email Address',
-                    fillColor: const Color(0xFFF1F8F1), // Off-white input
+                    hintStyle: const TextStyle(color: Colors.black38),
+                    fillColor: const Color(0xFFF1F8F1), 
                     filled: true,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFF435B5E), width: 2),
                     ),
                   ),
                 ),
@@ -120,10 +139,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          elevation: 5,
                         ),
                         child: const Text(
                           "Send Reset Link",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.white, 
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold
+                          ),
                         ),
                       ),
               ],
@@ -131,6 +155,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
