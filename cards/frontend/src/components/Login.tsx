@@ -3,6 +3,7 @@ import { buildPath } from './Path';
 import { storeToken } from '../tokenStorage';
 import { jwtDecode, type JwtPayload } from 'jwt-decode';
 import { Link } from 'react-router-dom';
+import fbLogo from '../assets/Logo.png';
 
 type AppTokenPayload = JwtPayload & {
     userId?: number;
@@ -182,7 +183,7 @@ function Login() {
         <main className="film-auth-page">
             
             {/* NEW PLACEMENT: Title at the very top of the page */}
-            <h1 className="main-logo">FilmBuff</h1>
+            <img src={fbLogo} alt="FilmBuffs Logo" className="main-logo" />
 
             <div className="auth-card">
                 
