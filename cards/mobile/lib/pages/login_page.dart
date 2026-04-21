@@ -51,23 +51,43 @@ void _doLogin() async {
   }
 }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF435B5E), // Match your home page theme
-      appBar: AppBar(
-        title: const Text("FilmBuff Login", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    // Allows the gradient to start from the very top of the screen
+    extendBodyBehindAppBar: true, 
+    appBar: AppBar(
+      title: const Text("FilmBuff Login", style: TextStyle(color: Colors.white)),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+    ),
+    body: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromARGB(255, 90, 121, 125), // Your custom lighter teal
+            Color(0xFF1A2627),                 // Your deep charcoal
+          ],
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
+      child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.movie_filter, size: 80, color: Colors.white),
+                // Your custom PNG logo
+                Image.asset(
+                  'assets/FB.png', 
+                  height: 180, 
+                  width: 180,  
+                  fit: BoxFit.contain, 
+                ),
                 const SizedBox(height: 30),
                 
                 // Username Field
@@ -78,9 +98,12 @@ void _doLogin() async {
                     labelText: "Username",
                     labelStyle: TextStyle(color: Colors.white70),
                     enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFB2D3D2))),
                   ),
                 ),
                 
+                const SizedBox(height: 10),
+
                 // Password Field
                 TextField(
                   controller: _passwordController,
@@ -90,6 +113,7 @@ void _doLogin() async {
                     labelText: "Password",
                     labelStyle: TextStyle(color: Colors.white70),
                     enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFB2D3D2))),
                   ),
                 ),
                 
@@ -102,14 +126,18 @@ void _doLogin() async {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB2D3D2),
-                          foregroundColor: Colors.black,
+                          backgroundColor: const Color(0xFFB2D3D2), // Matching card teal
+                          foregroundColor: Colors.black, // Black text on teal button
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         onPressed: _doLogin, 
-                        child: const Text("LOGIN"),
+                        child: const Text("LOGIN", style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                 
+                const SizedBox(height: 15),
+
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, '/register'), 
                   child: const Text(
@@ -118,12 +146,9 @@ void _doLogin() async {
                   ),
                 ),
 
-                // Underneath your "Create Account" button container
-                const SizedBox(height: 10),
                 TextButton(
                   onPressed: () {
-                    // Navigate to the Forgot Password Page
-                   Navigator.push(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
                     );
@@ -141,6 +166,7 @@ void _doLogin() async {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

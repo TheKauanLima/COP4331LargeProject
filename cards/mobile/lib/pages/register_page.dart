@@ -79,26 +79,83 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Create Account")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView( //Prevents keyboard overlap
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    // Allows gradient to go all the way to the top
+    extendBodyBehindAppBar: true, 
+    appBar: AppBar(
+      title: const Text("Create Account", style: TextStyle(color: Colors.white)),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      iconTheme: const IconThemeData(color: Colors.white), // Makes back arrow white
+    ),
+    body: Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromARGB(255, 90, 121, 125), // Your custom light teal
+            Color(0xFF1A2627),                 // Your deep charcoal
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              TextField(controller: _firstNameController, decoration: const InputDecoration(labelText: "First Name")),
-              TextField(controller: _lastNameController, decoration: const InputDecoration(labelText: "Last Name")),
-              TextField(controller: _emailController, decoration: const InputDecoration(labelText: "Email")),
-              TextField(controller: _loginController, decoration: const InputDecoration(labelText: "Username")),
-              TextField(controller: _passwordController, decoration: const InputDecoration(labelText: "Password"), obscureText: true),
-              const SizedBox(height: 20),
-              ElevatedButton(onPressed: _doRegister, child: const Text("Register")),
+              // Keep that FB logo consistent here too!
+              Image.asset('assets/FB.png', height: 100),
+              const SizedBox(height: 30),
+
+              _buildRegField(_firstNameController, "First Name"),
+              _buildRegField(_lastNameController, "Last Name"),
+              _buildRegField(_emailController, "Email"),
+              _buildRegField(_loginController, "Username"),
+              _buildRegField(_passwordController, "Password", isObscure: true),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB2D3D2), // Matching light teal
+                    foregroundColor: Colors.black,           // Black text for readability
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: _doRegister,
+                  child: const Text("REGISTER", style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+// Helper to keep the text field code clean and consistent
+Widget _buildRegField(TextEditingController controller, String label, {bool isObscure = false}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 15.0),
+    child: TextField(
+      controller: controller,
+      obscureText: isObscure,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+        focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFB2D3D2))),
+      ),
+    ),
+  );
+}
 }

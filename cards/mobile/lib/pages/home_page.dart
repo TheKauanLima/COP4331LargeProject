@@ -133,24 +133,45 @@ class _MovieHomePageState extends State<MovieHomePage> {
       emptyMessage = recommendationsMessage;
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF435B5E),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text("FilmBuff", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) => value == 'logout' ? _handleLogout(context) : null,
-            icon: const Icon(Icons.account_circle, size: 35, color: Colors.white),
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'logout', child: Text("Logout")),
-            ],
-          ),
+return Scaffold(
+  extendBodyBehindAppBar: true, // This allows the gradient to go under the transparent AppBar
+  appBar: AppBar(
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    title: Image.asset(
+    'assets/FB.png',
+    height: 100, // Adjust this height so it fits nicely in the bar
+    fit: BoxFit.contain,
+  ),
+    centerTitle: false,
+    actions: [
+      PopupMenuButton<String>(
+        onSelected: (value) => value == 'logout' ? _handleLogout(context) : null,
+        icon: const Icon(Icons.account_circle, size: 35, color: Colors.white),
+        itemBuilder: (context) => [
+          const PopupMenuItem(value: 'logout', child: Text("Logout", style: TextStyle(color: Colors.black))),
         ],
       ),
-      body: Column(
+    ],
+  ),
+  body: Container(
+    width: double.infinity,
+    height: double.infinity,
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color.fromARGB(255, 90, 121, 125), 
+          Color(0xFF1A2627), 
+        ],
+      ),
+    ),
+    // We put the Column inside the Container's child
+    child: SafeArea( 
+      child: Column(
         children: [
+          const SizedBox(height: 10), // Give it some space since AppBar is transparent
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: TextField(
@@ -160,17 +181,21 @@ class _MovieHomePageState extends State<MovieHomePage> {
                 fillColor: Colors.white,
                 filled: true,
                 hintText: 'Search movies...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(color: Colors.black54),
+                prefixIcon: const Icon(Icons.search, color: Colors.black),
                 suffixIcon: isSearching 
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: const Icon(Icons.clear, color: Colors.black),
                       onPressed: () {
                         _searchController.clear();
                         setState(() => isSearching = false);
                       },
                     )
                   : null,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
               ),
               onSubmitted: (value) => _onSearch(value),
             ),
@@ -185,7 +210,9 @@ class _MovieHomePageState extends State<MovieHomePage> {
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildTogglePill() {
