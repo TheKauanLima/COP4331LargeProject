@@ -110,6 +110,8 @@ p {
   margin-top: -10rem;    /* Pulls the logo up closer to the top of the screen */
   margin-bottom: -10rem; /* Pulls the login card up into the invisible bottom space */
   display: block;
+
+  pointer-events: none;
 }
 
 /* Search Bar */
@@ -288,12 +290,11 @@ p {
   color: #eab308;
 }
 
-.delete-btn {
+.delete-btn, .add-btn {
   position: absolute;
   top: 8px;
   right: 8px;
   background-color: rgba(255, 255, 255, 0.9);
-  color: #d32f2f;
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -306,32 +307,27 @@ p {
   transition: transform 0.2s, background-color 0.2s;
 }
 
+.delete-btn {
+  color: #ef4444; /* Red icon */
+}
+
 .delete-btn:hover {
   transform: scale(1.1);
   background-color: #fff;
 }
 
-.icon-trash {
-  width: 16px;
-  height: 16px;
-}
-
 .add-btn {
-  background-color: transparent;
-  border: none;
-  color: #4caf50; /* A nice, crisp success green */
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  color: #4caf50; /* Green icon */
 }
 
 .add-btn:hover {
-  background-color: rgba(76, 175, 80, 0.15); /* Light green background on hover */
-  transform: scale(1.1); /* Makes it pop out slightly when hovered! */
+  background-color: #fff;
+  transform: scale(1.1);
+}
+
+.icon-trash {
+  width: 16px;
+  height: 16px;
 }
 
 .film-auth-page {
@@ -355,6 +351,7 @@ p {
   margin-bottom: -10rem; /* Pulls the login card up into the invisible bottom space */
   display: block;
   /* You can delete the old text-shadow and font-weight lines! */
+  pointer-events: none;
 }
 
 .auth-card {
